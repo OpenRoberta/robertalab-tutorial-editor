@@ -1,0 +1,3 @@
+[submodule "robertalab"]
+	path = robertalab
+	url = https://github.com/OpenRoberta/robertalab.git
