@@ -237,22 +237,48 @@ function initGlobalEvents() {
     });
 
     var robotSelection = document.getElementById('tutorial-robot');
+    robotSelection.removeEventListener('change', handleSettingsChange);
     robotSelection.addEventListener('change', function(evt){
-        //Do not preventDefault to make sure the handleSettingsChange is called as well.
-        //Also: tutorial.robot is set in the handleSettingsChange. This might be called before this one, 
-        //so tutorial.robot might already be changed.
+        evt.preventDefault();
         
+        if (tutorial.robot === robotSelection.value) {
+            return;
+        }
+
         var rootUrl = window.location.href.slice(0, -10);
+        
+        tutorial.robot = robotSelection.value;
         
         if (!robots[tutorial.robot].toolbox) {
             var ajaxRequest = new XMLHttpRequest(),
-                relativePropertiesFilePath = rootUrl + '../robertalab/OpenRobertaParent/' + robots[tutorial.robot].project + '/src/main/resources/' + robots[tutorial.robot].filename + '.properties';
+                relativePropertiesFilePath = rootUrl + 'robertalab/OpenRobertaParent/' + robots[tutorial.robot].project + '/src/main/resources/' + robots[tutorial.robot].filename + '.properties';
             ajaxRequest.onreadystatechange = function () {
-                debugger;
+                if (this.readyState === 4 && this.status === 200 && this.responseText !== '') {
+                    var lines = this.responseText.split("\n"),
+                        content = {};
+                    for (var i = 0; i < lines.length; i++) {
+                        if (lines[i] === '' || lines[i].indexOf('#') === 0 || lines[i].indexOf('=') === -1) {
+                            continue;
+                        }
+                        
+                        var lineParts = lines[i].match(/^\s*([^\=\s]+)\s*\=\s*(.+)\s*$/);
+                        
+                        if (lineParts[1] === 'robot.program.toolbox.expert') {
+                            robots[tutorial.robot].toolbox = lineParts[2];
+                        } else if (lineParts[1] === 'robot.program.default') {
+                            robots[tutorial.robot].program = lineParts[2];
+                        } else if (lineParts[1] === 'robot.configuration.default') {
+                            robots[tutorial.robot].configuration = lineParts[2];
+                        }
+                    }
+                }
             }
-            ajaxRequest.open('GET', relativePropertiesFilePath, true);
+            
+            ajaxRequest.open('GET', relativePropertiesFilePath, false);
+            ajaxRequest.overrideMimeType('text/plain');
             ajaxRequest.send();
         }
+        workspace.updateToolbox(robots[tutorial.robot].toolbox);
     });
 }
 
