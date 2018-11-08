@@ -1,0 +1,325 @@
+html,
+body {
+	maring: 0;
+	padding: 0;
+	font-family: sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+#templates {
+	display: none;
+}
+
+.form-group {
+	margin: .5em;
+	padding: .5em; 
+	box-shadow: 0 0 2px 0px #c0c0c0 inset;
+}
+
+#global-settings {
+	position: fixed;
+	top: 0;
+	left:0;
+	right: 0;
+	height: 8em;
+	padding: 1em;
+	box-shadow: 0 3px 5px 0 #aeaeaf;
+	z-index: 1;
+}
+
+/**
+ * The toolbox automatically scales iteself in relation to the workspace.
+ * Thats why #blockly and #toolbox are emtpy.
+ */
+#blockly {
+}
+
+#blockly > #toolbox {
+}
+
+#blockly > #workspace {
+	position: fixed;
+	top: 8em;
+	left: 0;
+	bottom: 0;
+	width: 70vw;
+}
+
+#step-settings {
+	position: fixed;
+	top: 8em;
+	right: 0;
+	bottom: 0;
+	width: 30vw;
+	border-left: 4px solid #C0C0C0;
+	overflow: hidden;
+	padding: 1em;
+}
+
+#step-general,
+#step-quiz {
+	position: absolute;
+	display: block;
+	top: 6em;
+	left: 1em;
+	bottom: 1em;
+	width: 100%;
+	margin: 1em;
+	margin-left: 0;
+	transition: margin-left .5s ease;
+	overflow-x: hidden;
+	overflow-y: auto;
+	border-right: 2em solid transparent;
+}
+
+#step-settings-navigation {
+	position: absolute;
+	display: block;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 5em;
+	padding: 1em;
+	background-color: #fff;
+	border-bottom: 2px solid #c0c0c0;
+}
+
+#step-settings-navigation > button {
+	display: inline-block;;
+	padding: .5em;
+	line-height: 1;
+	margin: 0 .25em;
+	font-size: 1rem;
+	border: 1px solid #c0c0c0;
+	background-color: #fff;
+	box-sizing: border-box;
+}
+
+#step-settings-navigation > button.active {
+	border: 1px solid #F4A933;
+	color: #F4A933;
+}
+
+#step-general:not(.visible) {
+	margin-left: -110%;
+}
+
+#step-quiz:not(.visible) {
+	margin-left: 110%;
+}
+
+
+#tutorial-settings {
+	position: relative;
+	display: inline-block;
+	width: 32%;
+	height: 100%;
+	vertical-align: top;
+}
+
+#upload,
+#download {
+	margin: 1em;
+}
+
+#step-navigation {
+	position: relative;
+	display: inline-block;
+	width: 58%;
+	height: 100%;
+	vertical-align: middle;
+	margin-top: 1em;
+}
+
+.step-button {
+	display: inline-block;
+	width: 54px;
+	height: 54px;
+	padding: .5em;
+	line-height: 1;
+	margin: 0 .25em 0 0;
+	font-size: 24px;
+	border: 1px solid #c0c0c0;
+	background-color: #fff;
+	box-sizing: border-box;
+}
+
+.step-button.active {
+	background-color: #F4A933;
+	color: #fff;
+	border: 1px solid #F4A933;
+}
+
+.step-button:not(.active):hover {
+	border: 1px solid #F4A933;
+	color: #F4A933;
+}
+
+.form-row {
+	display: block;
+	width: 100%;
+	margin-bottom: .5em;
+}
+
+.form-row.horizontal > label {
+	display: inline-block;
+	min-width: 25%;
+}
+
+.form-row.horizontal > input[type="radio"] ~ label,
+.form-row.horizontal > input[type="checkbox"] ~ label {
+	min-width: 64%;
+}
+
+.form-row.horizontal > input,
+.form-row.horizontal > select,
+.form-row.horizontal > textarea {
+	display: inline-block;
+	width: 64%;
+}
+
+.form-row.horizontal > input[type="checkbox"],
+.form-row.horizontal > input[type="radio"] {
+	width: 25%;
+	margin: 0;
+}
+
+.form-row.vertical > label,
+.form-row.vertical > input,
+.form-row.vertical > select,
+.form-row.vertical > textarea {
+	display: block;
+	width: 100%;
+}
+
+textarea {
+	max-width: 100%;
+}
+
+textarea.small {
+	height: 5em;
+}
+
+textarea.mid {
+	height: 15em;
+}
+
+textarea.large {
+	height: 30em;
+}
+
+button {
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+.icon-button {
+	width: 30px;
+	height: 30px;
+	padding: 3px;
+	margin: 0;
+	border: 0 none;
+	background-color: #fff;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+#step-menu {
+	font-size: 0;
+	width: 54px;
+	position: relative;
+}
+
+#step-menu > .mini-button {
+	width: 26px;
+	height: 26px;
+	margin: 4px 0 0 0;
+	padding: 1px;
+	border: 0 none;
+	background-color: #fff;
+	box-sizing: border-box;
+	cursor: pointer;
+	line-height: 16px;
+	font-size: 16px;
+}
+
+#step-menu > #inject-step-before {
+	position: absolute;
+	left: -16px;
+}
+
+#step-menu > #inject-step-after {
+	position: absolute;
+	right: -16px;
+}
+
+#step-menu > #remove-step-button {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: -84px;
+	width: 54px;
+	padding: 1px 14px;
+	margin: 0;
+}
+
+.icon-button.icon-size-big {
+	width:54px;
+	height:54px;
+}
+
+.icon-button.icon-size-big > .icon {
+	padding-right: 0;
+	margin-bottom: 0;
+}
+
+
+#tutorial-text-menu-toggle {
+	position: absolute;
+	top: 0;
+	right: 30px;
+}
+
+.modal {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 9999;
+	background-color: rgba(0, 0, 0, .25);
+	padding: 2rem;
+}
+
+.modal > section {
+	width: 1200px;
+	max-height: 100%;
+	overflow-y: auto;
+	margin: 0 auto;
+	padding: 30px;
+	background-color: #fff;
+}
+
+.modal > button.close {
+	position: absolute;
+	top: 2rem;
+	right: 50%;
+	transform: translate(600px);
+}
+
+#step-menu {
+	display: none;
+	transition: margin-left .3s ease;
+}
+
+.step-button.active ~ #step-menu {
+	display: block;
+}
+
+.step-button.active:first-child:nth-last-child(3) ~ #step-menu #remove-step-button {
+	display: none;
+}
+
