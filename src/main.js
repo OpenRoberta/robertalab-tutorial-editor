@@ -192,6 +192,7 @@ function initGlobalEvents() {
     });
     
     var uploadInput = document.getElementById('upload');
+    
     uploadInput.removeEventListener('change', handleSettingsChange);
     uploadInput.addEventListener('change', function(evt) {
         evt.preventDefault();
@@ -202,25 +203,55 @@ function initGlobalEvents() {
             }
             var fileReader = new FileReader();
             fileReader.onload = function(evt) {
-                if (evt.target.result.trim() !== '') {
-                    var oldRobot = tutorial.robot;
+                if (evt.target.result.trim() === '') {
+                    return;
+                }
+                
+                var popup = getTemplate('double-opt-popup'),
+                    newTutorial = JSON.parse(evt.target.result);
+                
+                popup.querySelector('.double-opt-header').textContent = 'Soll das Tutorial tatäschlich eingefügt werden?';
+                popup.querySelector('.double-opt-info').textContent = 'Wenn das Tutorial eingespielt wird, werden alle aktuellen Daten überschrieben und gehen unwideruflich verloren. Nur das Laden eines vorherigen Stands kann dies wieder korrigieren. Erstellen Sie daher vorher eine Sicherheitskopie.';
+                popup.querySelector('.double-opt-accept').addEventListener('click', function (evt) {
+                    evt.preventDefault();
+                    document.body.removeChild(popup);
+
+                    var oldRobot = tutorial.robot,
+                        oldLanguage = tutorial.language;
                     
-                    tutorial = JSON.parse(evt.target.result);
+                    tutorial = newTutorial;
                     if (tutorial.step.length === 0) {
                         tutorial.step.push(JSON.parse(JSON.stringify(defaultStep)));
                     }
                     currentStep = tutorial.step[0];
                     refreshSettings('tutorial.');
-                    if (oldRobot !== tutorial.robot) {
+                    refreshStepNavigation();
+                    if (oldRobot !== tutorial.robot || oldLanguage !== tutorial.language) {
                         if (!robots[tutorial.robot].toolbox) {
                             loadRobotData();
                         }
                         setRobotDataInWorkspaces();
+                        
+                        if (currentStep.program) {
+                            loadProgramOfStep(currentStep);
+                        }
+                        
+                        if (!languageCache[tutorial.language]) {
+                            loadLanguageData();
+                        } else {
+                            Blockly.Msg = languageCache[tutorial.language];
+                            changeLanguageInViewAndImages();
+                        }
+                    } else {
+                        loadProgramOfStep(currentStep);
                     }
-                    
-                    loadProgramOfStep(currentStep);
-                    refreshStepNavigation();
-                }
+                });
+                popup.querySelector('.double-opt-deny').addEventListener('click', function (evt) {
+                    evt.preventDefault();
+                    document.body.removeChild(popup);
+                });
+                
+                document.body.appendChild(popup);
             }
             fileReader.readAsText(file);
         }
@@ -473,7 +504,7 @@ function loadLanguageData() {
     
     script.src = './robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/msg/js/' + tutorial.language.toLowerCase() + '.js';
     
-    //remove Blockly.Msg, so the values are not simply overriden and change the values of the current selected value in the cache
+    //remove Blockly.Msg, so the values are not simply overridden and change the values of the current selected value in the cache
     Blockly.Msg = {};
     document.head.appendChild(script);
 }
