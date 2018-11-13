@@ -523,10 +523,12 @@ function persistCurrentProgramInStep(step) {
                  return svgImage.svgGroup_.outerHTML;
              }).join(''),
              height = Math.max(... rootBlocks.map(function(rootBlock){
-                 return rootBlock.height + rootBlock.xy_.y;
+                 var transform = rootBlock.svgGroup_.attributes.transform;
+                 return Math.ceil(rootBlock.height + (transform ? parseInt(transform.value.match(/translate\(\d+,(\d+)\)/)[1]) : 0));
              })),
              width = Math.max(... rootBlocks.map(function(rootBlock){
-                 return rootBlock.width + rootBlock.xy_.x;
+                 var transform = rootBlock.svgGroup_.attributes.transform;
+                 return Math.ceil(rootBlock.width + (transform ? parseInt(transform.value.match(/translate\((\d+),\d+\)/)[1]) : 0));
              })),
              svg = document.createElement('svg');
          
