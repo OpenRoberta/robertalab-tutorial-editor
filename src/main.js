@@ -1,17 +1,19 @@
 
 var workspace = null,
+    configuration = null,
     defaultStep = {
         header: '',
         tip: '',
         instruction: '',
-        toolbox: false,
-        maxBlocks: false,
-        solution: false,
+        toolbox: null,
+        maxBlocks: null,
+        solution: null,
+        program: null,
         quiz: []
     },
     tutorial = {
         name: '',
-        robot: '',
+        robot: 'ev3',
         language: 'DE',
         step : [
             JSON.parse(JSON.stringify(defaultStep))
@@ -28,6 +30,7 @@ var workspace = null,
             project: 'RobotNXT',
             filename: 'nxt'
         },
+        /*
         wedo: {
             groupName: 'LEGO Education WeDo 2.0',
             project: 'RobotWeDo',
@@ -38,6 +41,7 @@ var workspace = null,
             project: 'RobotArdu',
             filename: 'nano'
         },
+        */
         calliope: {
             groupName: 'Calliope Mini',
             project: 'RobotMbed',
@@ -71,7 +75,7 @@ var workspace = null,
         vorwerk: {
             groupName: 'Vorwerk',
             project: 'RobotVorwerk',
-            filename: 'nao'
+            filename: 'vorwerk'
         },
     },
     currentStep = null,
@@ -80,12 +84,12 @@ var workspace = null,
         answer: ['']
     },
     refreshing = false,
-    templates = {},
-    toolbox;
+    templates = {};
 
 window.onload = function () {
-    initBlockly();
+    loadRobotData();
     loadTemplates();
+    initBlockly();
     initSettings();
     initGlobalEvents();
     loadStep(0);
@@ -154,6 +158,17 @@ function initGlobalEvents() {
         });
     }
     
+    CKEDITOR.on('instanceCreated', function(event) {
+        event.editor.on('change', function () {
+            var textarea = document.getElementById(event.editor.name),
+                changeEvent = new Event('change');
+            textarea.value = event.editor.getData();
+            textarea.dispatchEvent(changeEvent);
+        });
+    });
+    
+    CKEDITOR.replaceAll('rich-text-edit');
+    
     var formFields = document.querySelectorAll('input, select, textarea');
     
     for (var i = 0; i < formFields.length; i++) {
@@ -163,20 +178,35 @@ function initGlobalEvents() {
     var downloadButton = document.getElementById('download');
     downloadButton.addEventListener('click', function(evt) {
         evt.preventDefault();
-        persistCurrentProgramForStep(currentStep);
-        download(JSON.stringify(tutorial));
+        persistCurrentProgramInStep(currentStep);
+        var downloadElement = document.createElement('a');
+        downloadElement.href= 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(tutorial, null, 4));
+        downloadElement.setAttribute('download', 'tutorial.json');
+        downloadElement.style.display = 'none';
+        document.body.appendChild(downloadElement);
+        downloadElement.click();
+        document.body.removeChild(downloadElement);
     });
     
-    var uploadButton = document.getElementById('upload');
-    uploadButton.addEventListener('click', function(evt) {
+    var uploadInput = document.getElementById('upload');
+    uploadInput.removeEventListener('change', handleSettingsChange);
+    uploadInput.addEventListener('change', function(evt) {
         evt.preventDefault();
-        upload();
-    });
-    
-    var addStepButton = document.getElementById('add-step');
-    addStepButton.addEventListener('click', function(evt) {
-        evt.preventDefault();
-        addStep();
+        if (this.files.length > 0) {
+            var file = this.files[0];
+            if (file.type !== 'application/json') {
+                return;
+            }
+            var fileReader = new FileReader();
+            fileReader.onload = function(evt) {
+                if (evt.target.result.trim() !== '') {
+                    tutorial = JSON.parse(evt.target.result);
+                    currentStep = null;
+                    loadStep(0);
+                }
+            }
+            fileReader.readAsText(file);
+        }
     });
 
     var addQuestionButton = document.getElementById('step-quiz-add-question');
@@ -206,16 +236,29 @@ function initGlobalEvents() {
             return;
         }
         
-        var currentStepIndex = tutorial.step.indexOf(currentStep);
+        var currentStepIndex = tutorial.step.indexOf(currentStep),
+            popup = getTemplate('double-opt-popup');
         
-        if (currentStepIndex === 0) {
-            loadStep(1);
-        } else {
-            loadStep(currentStepIndex - 1);
-        }
-        tutorial.step.splice(currentStepIndex, 1);
+        popup.querySelector('.double-opt-header').textContent = 'Soll Schritt ' + (currentStepIndex + 1) + ' wirklich gelöscht werden?';
+        popup.querySelector('.double-opt-info').textContent = 'Indem Sie diesen Schritt löschen werden alle damit verbundenen Daten unwideruflich gelöscht. Nur das Laden eines vorherigen Stands kann dies wieder korrigieren.';
+        popup.querySelector('.double-opt-accept').addEventListener('click', function (evt) {
+            evt.preventDefault();
+            document.body.removeChild(popup);
+            if (currentStepIndex === 0) {
+                loadStep(1);
+            } else {
+                loadStep(currentStepIndex - 1);
+            }
+            tutorial.step.splice(currentStepIndex, 1);
 
-        refreshStepNavigation();
+            refreshStepNavigation();
+        });
+        popup.querySelector('.double-opt-deny').addEventListener('click', function (evt) {
+            evt.preventDefault();
+            document.body.removeChild(popup);
+        });
+        
+        document.body.appendChild(popup);
     });
 
     var stepSettingsGeneralToggle = document.getElementById('view-step-general');
@@ -244,57 +287,45 @@ function initGlobalEvents() {
         if (tutorial.robot === robotSelection.value) {
             return;
         }
-
-        var rootUrl = window.location.href.slice(0, -10);
         
         tutorial.robot = robotSelection.value;
         
         if (!robots[tutorial.robot].toolbox) {
-            var ajaxRequest = new XMLHttpRequest(),
-                relativePropertiesFilePath = rootUrl + 'robertalab/OpenRobertaParent/' + robots[tutorial.robot].project + '/src/main/resources/' + robots[tutorial.robot].filename + '.properties';
-            ajaxRequest.onreadystatechange = function () {
-                if (this.readyState === 4 && this.status === 200 && this.responseText !== '') {
-                    var lines = this.responseText.split("\n"),
-                        content = {};
-                    for (var i = 0; i < lines.length; i++) {
-                        if (lines[i] === '' || lines[i].indexOf('#') === 0 || lines[i].indexOf('=') === -1) {
-                            continue;
-                        }
-                        
-                        var lineParts = lines[i].match(/^\s*([^\=\s]+)\s*\=\s*(.+)\s*$/);
-                        
-                        if (lineParts[1] === 'robot.program.toolbox.expert') {
-                            robots[tutorial.robot].toolbox = lineParts[2];
-                        } else if (lineParts[1] === 'robot.program.default') {
-                            robots[tutorial.robot].program = lineParts[2];
-                        } else if (lineParts[1] === 'robot.configuration.default') {
-                            robots[tutorial.robot].configuration = lineParts[2];
-                        }
-                    }
-                }
-            }
-            
-            ajaxRequest.open('GET', relativePropertiesFilePath, false);
-            ajaxRequest.overrideMimeType('text/plain');
-            ajaxRequest.send();
+            loadRobotData();
         }
-        workspace.updateToolbox(robots[tutorial.robot].toolbox);
+
+        if (workspace !== null) {
+            if (configuration !== null) {
+                configuration.updateToolbox(robots[tutorial.robot].configurationToolbox);
+                workspace.setDevice({
+                    group : tutorial.robot
+                });
+                workspace.clear();
+                Blockly.Xml.domToWorkspace(robots[tutorial.robot].configuration, configuration);
+            }
+            workspace.updateToolbox(robots[tutorial.robot].toolbox);
+            workspace.setDevice({
+                group : tutorial.robot
+            });
+            workspace.clear();
+            Blockly.Xml.domToWorkspace(robots[tutorial.robot].program, workspace);
+        }
     });
 }
 
 function initBlockly() {
-    toolbox = document.getElementById('toolbox');
+    initBrickly();
     workspace = Blockly.inject('workspace', {
         comments: true,
         disable: true,
-        collapse: true,
+        collapse: false,
         grid: false,
         maxBlocks: Infinity,
-        media: './blockly/media/',
+        media: './../robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/media/',
         readOnly: false,
         rtl: false,
         scrollbars: true,
-        toolbox: toolbox,
+        toolbox: robots[tutorial.robot].toolbox,
         zoom: {
             controls: true,
             wheel: true,
@@ -307,24 +338,88 @@ function initBlockly() {
         variableDeclaration: true,
         robControls: true
     });
-    workspace.setDevice(tutorial.robot);
+    workspace.setDevice({
+        group : tutorial.robot
+    });
+
+    Blockly.Xml.domToWorkspace(robots[tutorial.robot].program, workspace);
+}
+
+function initBrickly() {
+    configuration = Blockly.inject(document.getElementById('bricklyDiv'), {
+        path : './../robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/',
+        toolbox : robots[tutorial.robot].configurationToolbox,
+        trashcan : true,
+        scrollbars : true,
+        media : './../robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/media/',
+        zoom : {
+            controls : true,
+            wheel : false,
+            startScale : 1.0,
+            maxScale : 4,
+            minScale : .25,
+            scaleSpeed : 1.1
+        },
+        checkInTask : [ '-Brick', 'robConf' ],
+        variableDeclaration : true,
+        robControls : true
+    });
     
-    /*
-    // Restore previously displayed text.
-    if (sessionStorage) {
-        var text = sessionStorage.getItem('textarea');
-        if (text) {
-            document.getElementById('importExport').value = text;
-        }
-        // Restore event logging state.
-        var state = sessionStorage.getItem('logEvents');
-        logEvents(Boolean(Number(state)));
-    } else {
-        // MSIE 11 does not support sessionStorage on file:// URLs.
-        logEvents(false);
+    configuration.setDevice({
+        group : tutorial.robot
+    });
+    configuration.setVersion('2.0');
+    
+    // Configurations can't be executed
+    configuration.robControls.runOnBrick.setAttribute("style", "display : none");
+    configuration.robControls.disable('saveProgram');
+    
+    Blockly.Xml.domToWorkspace(robots[tutorial.robot].configuration, configuration);
+}
+
+function loadRobotData() {
+    
+    if (!tutorial.robot || !robots[tutorial.robot]) {
+        return;
     }
-    taChange();
-    */
+    
+    var ajaxRequest = new XMLHttpRequest(),
+        relativePropertiesFilePath = window.location.href.slice(0, -10) + 'robertalab/OpenRobertaParent/' + robots[tutorial.robot].project + '/src/main/resources/' + robots[tutorial.robot].filename + '.properties';
+    
+    ajaxRequest.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200 && this.responseText !== '') {
+            var lines = this.responseText.split("\n");
+            for (var i = 0; i < lines.length; i++) {
+                if (lines[i] === '' || lines[i].indexOf('#') === 0 || lines[i].indexOf('=') === -1) {
+                    continue;
+                }
+                
+                var lineParts = lines[i].match(/^\s*([^\=\s]+)\s*\=\s*(.+)\s*$/);
+                
+                if (lineParts[1] === 'robot.program.toolbox.expert') {
+                    robots[tutorial.robot].toolbox = lineParts[2];
+                } else if (lineParts[1] === 'robot.program.default') {
+                    try {
+                        robots[tutorial.robot].program = Blockly.Xml.textToDom(lineParts[2]);
+                    } catch (error) {
+                        //Ignore program
+                    }
+                } else if (lineParts[1] === 'robot.configuration.default') {
+                    try {
+                        robots[tutorial.robot].configuration = Blockly.Xml.textToDom(lineParts[2]);
+                    } catch (error) {
+                        //Ignore program
+                    }
+                } else if (lineParts[1] === 'robot.configuration.toolbox') {
+                    robots[tutorial.robot].configurationToolbox = lineParts[2];
+                }
+            }
+        }
+    }
+    
+    ajaxRequest.open('GET', relativePropertiesFilePath, false);
+    ajaxRequest.overrideMimeType('text/plain');
+    ajaxRequest.send();
 }
 
 /* Step settings handling functions */
@@ -332,7 +427,7 @@ function refreshStepNavigation() {
     var stepNavigation = document.getElementById('step-navigation');
 
     //First remove all steps
-    while(stepNavigation.firstChild.id != 'add-step') {
+    while(stepNavigation.firstChild.id != 'step-menu') {
         stepNavigation.removeChild(stepNavigation.firstChild);
     }
     
@@ -352,7 +447,7 @@ function refreshStepNavigation() {
 
 function addStepNavigationButton(stepIndex) {
     var container = document.getElementById('step-navigation'),
-        addButton = container.querySelector('#add-step'),
+        stepMenu = container.querySelector('#step-menu'),
         stepButton = getTemplate('step-button'),
         currentIndex = tutorial.step.indexOf(currentStep);
     
@@ -366,7 +461,7 @@ function addStepNavigationButton(stepIndex) {
         loadStep(stepIndex);
     });
     
-    container.insertBefore(stepButton, addButton);
+    container.insertBefore(stepButton, stepMenu);
 }
 
 function addStep(stepData) {
@@ -405,30 +500,132 @@ function loadStep(stepIndex) {
     }
     
     if (currentStep !== null) {
-        persistCurrentProgramForStep(currentStep);
+        persistCurrentProgramInStep(currentStep);
     }
     
     currentStep = tutorial.step[stepIndex];
+    
+    loadProgramOfStep(currentStep);
 
-    refreshStepNavigation();
     refreshStepView();
 }
 
-function persistCurrentProgramForStep(step) {
+function persistCurrentProgramInStep(step) {
      var xml = Blockly.Xml.workspaceToDom(workspace);
-     step.solution = Blockly.Xml.domToPrettyText(xml);
+     step.program = Blockly.Xml.domToText(xml);
+     
+     if (step.solution) {
+         workspace.cleanUp_();
+         var rootBlocks = workspace.getTopBlocks().filter(function(svg) {
+                 return svg.inTask;
+             }),
+             svgImage = rootBlocks.map(function (svgImage) {
+                 return svgImage.svgGroup_.outerHTML;
+             }).join(''),
+             height = Math.max(... rootBlocks.map(function(rootBlock){
+                 return rootBlock.height + rootBlock.xy_.y;
+             })),
+             width = Math.max(... rootBlocks.map(function(rootBlock){
+                 return rootBlock.width + rootBlock.xy_.x;
+             })),
+             svg = document.createElement('svg');
+         
+         svg.innerHTML = svgImage;
+         svg.setAttribute('viewBox', "0 0 " + width + " " + height);
+         
+         step.solution = svg.outerHTML;
+     }
+
+     if (step.toolbox) {
+         var usedBlockTypes = getDistinctBlockTypeListForProgram(xml),
+             defaultBlockTypes = getDistinctBlockTypeListForProgram(robots[tutorial.robot].program),
+             toolBoxBlockTypes = usedBlockTypes.filter(function(usedBlockType) {
+                 return defaultBlockTypes.indexOf(usedBlockType) === -1;
+             }),
+             toolBox = Blockly.Xml.textToDom(robots[tutorial.robot].toolbox),
+             toolBoxBlocks = toolBox.querySelectorAll('block[type]'),
+             blockParent;
+         
+         for (var i = 0; i < toolBoxBlocks.length; i++) {
+             if (toolBoxBlockTypes.indexOf(toolBoxBlocks[i].attributes.type.value) === -1) {
+                 blockParent = toolBoxBlocks[i].parentNode;
+                 blockParent.removeChild(toolBoxBlocks[i]);
+                 if (blockParent.children.length === 0) {
+                     blockParent.parentNode.removeChild(blockParent);
+                 }
+             }
+         }
+         
+         var innerCategories = toolBox.querySelectorAll('category category');
+         
+         for (var i = 0; i < innerCategories.length; i++) {
+             while (innerCategories[i].children.length > 0) {
+                 innerCategories[i].parentNode.appendChild(innerCategories[i].children[0]);
+             }
+             innerCategories[i].parentNode.removeChild(innerCategories[i]);
+         }
+         
+         var categories = toolBox.querySelectorAll('category');
+         
+         for (var i = 0; i < categories.length; i++) {
+             if (categories[i].children.length === 0 
+                 && (categories[i].attributes.name.value !== 'TOOLBOX_PROCEDURE' || (
+                         toolBoxBlockTypes.indexOf('robProcedures_defnoreturn') === -1
+                         && toolBoxBlockTypes.indexOf('robProcedures_defreturn') === -1)
+                     )
+                 && (categories[i].attributes.name.value !== 'TOOLBOX_VARIABLE' || (
+                         toolBoxBlockTypes.indexOf('robGlobalVariables_declare') === -1 
+                         && toolBoxBlockTypes.indexOf('robLocalVariables_declare') === -1)
+                     )
+                 ) {
+                 categories[i].parentNode.removeChild(categories[i]);
+             }
+         }
+         
+         currentStep.toolbox = Blockly.Xml.domToText(toolBox);
+     }
+     
+     if (step.maxBlocks) {
+         step.maxBlocks = calculateMaxBlocks();
+     }
+     
+     var blockTypes = getDistinctBlockTypeListForProgram(xml);
+}
+
+function getDistinctBlockTypeListForProgram(rootElement) {
+    var blocks = rootElement.querySelectorAll('block[type]'),
+        blockTypes = [];
+
+    //Check if the root itself is a block
+    if (rootElement.tagName.toUpperCase() === 'block' && rootElement.attributes.type && rootElement.attributes.type.value !== '') {
+        blocks.push(rootElement);
+    }
+    
+    for(var i = 0; i < blocks.length; i++) {
+        blockTypes.push(blocks[i].attributes.type.value);
+    }
+    
+    return blockTypes.filter(function(blockType, index, blockTypes) {
+            return blockTypes.indexOf(blockType) === index;
+        });
+}
+
+function loadProgramOfStep(step) {
+    if (step.program) {
+        try {
+            var xml = Blockly.Xml.textToDom(step.program);
+            workspace.clear();
+            Blockly.Xml.domToWorkspace(xml, workspace);
+        } catch(e) {
+            //TODO: Show hint, that the XML for the step is malformed
+            return;
+        }
+    }
 }
 
 function refreshStepView() {
+    refreshStepNavigation();
     refreshSettings('tutorial.step.');
-    
-    if (currentStep.solution) {
-        //loadProgram(currentStep.solution);
-    }
-    
-    if (currentStep.toolbox) {
-        //loadToolbox(currentStep.toolbox);
-    }
 }
 
 function refreshSettings(filter) {
@@ -450,7 +647,7 @@ function refreshSettings(filter) {
         identifierChain.splice(2, 1, stepIndex);
         formFields[i].name = identifierChain.join('.');
         
-        //Remove tutorial, because we always strt at tutorial
+        //Remove tutorial, because parent starts at tutorial and not at window
         identifierChain.shift();
         
         for (var j = 0; j < identifierChain.length; j++) {
@@ -464,11 +661,13 @@ function refreshSettings(filter) {
             }
             
             if (j + 1 === identifierChain.length) {
-                if (typeof window[identifierChain[j]] === 'function') {
+                if (typeof window[identifierChain[j] + 'ToDom'] === 'function') {
                     window[identifierChain[j] + 'ToDom'](parent, formFields[i]);
                 } else {
                     if (checkType) {
                         formFields[i].checked = !!parent[identifierChain[j]];
+                    } else if (formFields[i].tagName.toUpperCase() === 'TEXTAREA' && formFields[i].classList.contains('rich-text-edit')) {
+                        CKEDITOR.instances[formFields[i].id].setData(parent[identifierChain[j]]);
                     } else {
                         formFields[i].value = parent[identifierChain[j]];
                     }
@@ -493,11 +692,13 @@ function refreshQuizForm() {
         stepIndex = tutorial.step.indexOf(currentStep),
         i = 0;
     
+    
     for(i = 0; i < oldQuestions.length; i++) {
         stepQuiz.removeChild(oldQuestions[i]);
     }
-    
-    if (newQuestions.length === 0) {
+
+    if (typeof newQuestions === 'undefined' || newQuestions === null || newQuestions.length === 0) {
+        currentStep.quiz = []; //Sanitize data structure
         return;
     }
     
@@ -646,6 +847,68 @@ function setAnswerCorrectStateToDom(answer, formField) {
     formField.checked = answer.indexOf('!') === 0;
 }
 
+function toggleMaxBlocks(step, useMaxBlocks, fullIdentifier) {
+    if (useMaxBlocks) {
+        step.maxBlocks = calculateMaxBlocks();
+    } else {
+        step.maxBlocks = null;
+    }
+}
+
+function toggleMaxBlocksToDom(step, formField) {
+    formField.checked = !!step.maxBlocks;
+}
+
+function addMaxBlocks(step, extraBlocks, fullIdentifier) {
+    if (step.maxBlocks) {
+        step.maxBlocks = calculateMaxBlocks();
+    }
+}
+
+function addMaxBlocksToDom(step, formField) {
+    if (!step.maxBlocks) {
+        formField.value = 0;
+        return;
+    }
+
+    formField.value = step.maxBlocks - Blockly.Xml.workspaceToDom(workspace).querySelectorAll('block[intask="true"]').length;
+}
+
+function calculateMaxBlocks() {
+    var maxBlocksExtraInput = document.getElementById('step-maxBlocks-add'),
+        usedBlocksWithDuplicates = Blockly.Xml.workspaceToDom(workspace).querySelectorAll('block[intask="true"]').length;
+    
+    maxBlocksExtraInput = maxBlocksExtraInput.value === '' ? 0 : parseInt(maxBlocksExtraInput.value);
+    
+    return usedBlocksWithDuplicates + maxBlocksExtraInput;
+}
+
+function toggleToolboxLimit(step, toolBoxActive, fullIdentifier) {
+    if (!!step.toolbox !== toolBoxActive) {
+        step.toolbox = toolBoxActive ? true : null;
+    }
+}
+
+function toggleToolboxLimitToDom(step, formField) {
+    formField.checked = !!step.toolbox;
+}
+
+function toggleSolution(step, solutionActive, fullIdentifier) {
+    if (!!step.solution !== solutionActive) {
+        step.solution = solutionActive ? true : null;
+    }
+}
+
+function toggleSolutionToDom(step, formField) {
+    formField.checked = !!step.solution;
+}
+
+
+// Solution image: 
+// 
+
+// OLD FUNCTIONS
+
 function toXml() {
     var output = document.getElementById('importExport');
     var xml = Blockly.Xml.workspaceToDom(workspace);
@@ -659,12 +922,6 @@ function fromXml() {
     var input = document.getElementById('importExport');
     var xml = Blockly.Xml.textToDom(input.value);
     Blockly.Xml.domToWorkspace(xml, workspace);
-    taChange();
-}
-
-function toCode(lang) {
-    var output = document.getElementById('importExport');
-    output.value = Blockly[lang].workspaceToCode(workspace);
     taChange();
 }
 

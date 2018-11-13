@@ -40,6 +40,10 @@ body {
 #blockly > #toolbox {
 }
 
+#brickly {
+	display: none;
+}
+
 #blockly > #workspace {
 	position: fixed;
 	top: 8em;
@@ -98,6 +102,11 @@ body {
 	box-sizing: border-box;
 }
 
+#step-settings-navigation > button.content {
+	border-color: #A4B738;
+	color: #A4B738;
+}
+
 #step-settings-navigation > button.active {
 	border: 1px solid #F4A933;
 	color: #F4A933;
@@ -118,11 +127,17 @@ body {
 	width: 32%;
 	height: 100%;
 	vertical-align: top;
+	padding-right: 30px;
 }
 
-#upload,
+#upload-label,
 #download {
+	display: inline-block;
 	margin: 1em;
+}
+
+#upload {
+	display: none;
 }
 
 #step-navigation {
@@ -151,6 +166,8 @@ body {
 	background-color: #F4A933;
 	color: #fff;
 	border: 1px solid #F4A933;
+	margin: 0 1.75em 0 1.5em;
+	cursor: grab;
 }
 
 .step-button:not(.active):hover {
@@ -164,27 +181,38 @@ body {
 	margin-bottom: .5em;
 }
 
+.form-row:before,
+.form-row:after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
 .form-row.horizontal > label {
-	display: inline-block;
+	display: block;
 	min-width: 25%;
+	float: left;
 }
 
 .form-row.horizontal > input[type="radio"] ~ label,
 .form-row.horizontal > input[type="checkbox"] ~ label {
-	min-width: 64%;
+	min-width: 75%;
+	float: right;
 }
 
 .form-row.horizontal > input,
 .form-row.horizontal > select,
 .form-row.horizontal > textarea {
-	display: inline-block;
-	width: 64%;
+	display: block;
+	width: 75%;
+	float: right;
 }
 
 .form-row.horizontal > input[type="checkbox"],
 .form-row.horizontal > input[type="radio"] {
 	width: 25%;
 	margin: 0;
+	float: left;
 }
 
 .form-row.vertical > label,
@@ -236,7 +264,7 @@ button {
 #step-menu > .mini-button {
 	width: 26px;
 	height: 26px;
-	margin: 4px 0 0 0;
+	margin: 0;
 	padding: 1px;
 	border: 0 none;
 	background-color: #fff;
@@ -246,24 +274,40 @@ button {
 	font-size: 16px;
 }
 
+#step-menu > #inject-step-after,
 #step-menu > #inject-step-before {
 	position: absolute;
-	left: -16px;
+	top: -40px;
+}
+
+#step-menu > #inject-step-after,
+#step-menu > #inject-step-before,
+#step-menu > #remove-step-button {
+	font-weight: 700;
+	color: #c0c0c0;
+	font-size: 1.1rem;
+}
+
+
+#step-menu > #inject-step-after:hover,
+#step-menu > #inject-step-before:hover,
+#step-menu > #remove-step-button:hover {
+	color: #fff;
+	background-color: #F4A933;
+}
+
+#step-menu > #inject-step-before {
+	left: -33px;
 }
 
 #step-menu > #inject-step-after {
-	position: absolute;
-	right: -16px;
+	right: -33px;
 }
 
 #step-menu > #remove-step-button {
 	position: absolute;
-	left: 0;
 	right: 0;
-	top: -84px;
-	width: 54px;
-	padding: 1px 14px;
-	margin: 0;
+	top: -80px;
 }
 
 .icon-button.icon-size-big {
@@ -276,11 +320,10 @@ button {
 	margin-bottom: 0;
 }
 
-
 #tutorial-text-menu-toggle {
 	position: absolute;
-	top: 0;
-	right: 30px;
+	top: -3px;
+	right: 0;
 }
 
 .modal {
@@ -319,7 +362,66 @@ button {
 	display: block;
 }
 
-.step-button.active:first-child:nth-last-child(3) ~ #step-menu #remove-step-button {
+.step-button.active:first-child:nth-last-child(2) ~ #step-menu #remove-step-button {
 	display: none;
 }
 
+.right-big {
+	float: right;
+	width: 75%;
+}
+
+.right-small {
+	float: right;
+	width: 25%;
+}
+
+.left-big {
+	float: left;
+	width: 75%;
+}
+
+.left-small {
+	float: left;
+	width: 25%;
+}
+
+.double-opt-popup {
+	position: fixed;
+	display: block;
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.1);
+	z-index: 9999;
+}
+
+.double-opt-popup > article {
+	diplay: block;
+	margin: 1em auto;
+	width: 30em;
+	padding: 1em;
+	background-color: #fff;
+}
+
+.double-opt-popup > article > .double-opt-accept {
+	float: left;
+}
+
+.double-opt-popup > article > .double-opt-deny {
+	float: right;
+}
+
+.double-opt-popup > article:after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+.rotate {
+	display: inline-block;
+	transform: rotate(45deg);
+    height: 1rem;
+    width: 1rem;
+}
