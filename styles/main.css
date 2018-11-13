@@ -44,7 +44,7 @@ body {
 	display: none;
 }
 
-#blockly > #workspace {
+#blockly > #blocklyDiv {
 	position: fixed;
 	top: 8em;
 	left: 0;
@@ -196,7 +196,7 @@ body {
 
 .form-row.horizontal > input[type="radio"] ~ label,
 .form-row.horizontal > input[type="checkbox"] ~ label {
-	min-width: 75%;
+	min-width: 85%;
 	float: right;
 }
 
@@ -210,7 +210,7 @@ body {
 
 .form-row.horizontal > input[type="checkbox"],
 .form-row.horizontal > input[type="radio"] {
-	width: 25%;
+	width: 15%;
 	margin: 0;
 	float: left;
 }
@@ -366,6 +366,11 @@ button {
 	display: none;
 }
 
+.right-xxl {
+	float: right;
+	width: 85%;
+}
+
 .right-big {
 	float: right;
 	width: 75%;
@@ -376,6 +381,16 @@ button {
 	width: 25%;
 }
 
+.right-xs {
+	float: right;
+	width: 15%;
+}
+
+.leftt-xxl {
+	float: left;
+	width: 85%;
+}
+
 .left-big {
 	float: left;
 	width: 75%;
@@ -384,6 +399,11 @@ button {
 .left-small {
 	float: left;
 	width: 25%;
+}
+
+.left-xs {
+	float: left;
+	width: 15%;
 }
 
 .double-opt-popup {

@@ -30,18 +30,18 @@ var workspace = null,
             project: 'RobotNXT',
             filename: 'nxt'
         },
-        /*
         wedo: {
             groupName: 'LEGO Education WeDo 2.0',
             project: 'RobotWeDo',
-            filename: 'wedo'
+            filename: 'wedo',
+            specificRobot: 'wedo'
         },
         arduino: {
             groupName: 'NEPO4Arduino',
             project: 'RobotArdu',
-            filename: 'nano'
+            filename: 'nano',
+            specificRobot: 'uno'
         },
-        */
         calliope: {
             groupName: 'Calliope Mini',
             project: 'RobotMbed',
@@ -84,6 +84,9 @@ var workspace = null,
         answer: ['']
     },
     refreshing = false,
+    languageCache = {
+        DE: JSON.parse(JSON.stringify(Blockly.Msg))
+    },
     templates = {};
 
 window.onload = function () {
@@ -200,9 +203,23 @@ function initGlobalEvents() {
             var fileReader = new FileReader();
             fileReader.onload = function(evt) {
                 if (evt.target.result.trim() !== '') {
+                    var oldRobot = tutorial.robot;
+                    
                     tutorial = JSON.parse(evt.target.result);
-                    currentStep = null;
-                    loadStep(0);
+                    if (tutorial.step.length === 0) {
+                        tutorial.step.push(JSON.parse(JSON.stringify(defaultStep)));
+                    }
+                    currentStep = tutorial.step[0];
+                    refreshSettings('tutorial.');
+                    if (oldRobot !== tutorial.robot) {
+                        if (!robots[tutorial.robot].toolbox) {
+                            loadRobotData();
+                        }
+                        setRobotDataInWorkspaces();
+                    }
+                    
+                    loadProgramOfStep(currentStep);
+                    refreshStepNavigation();
                 }
             }
             fileReader.readAsText(file);
@@ -294,28 +311,32 @@ function initGlobalEvents() {
             loadRobotData();
         }
 
-        if (workspace !== null) {
-            if (configuration !== null) {
-                configuration.updateToolbox(robots[tutorial.robot].configurationToolbox);
-                workspace.setDevice({
-                    group : tutorial.robot
-                });
-                workspace.clear();
-                Blockly.Xml.domToWorkspace(robots[tutorial.robot].configuration, configuration);
-            }
-            workspace.updateToolbox(robots[tutorial.robot].toolbox);
-            workspace.setDevice({
-                group : tutorial.robot
-            });
-            workspace.clear();
-            Blockly.Xml.domToWorkspace(robots[tutorial.robot].program, workspace);
+        setRobotDataInWorkspaces();
+    });
+    
+    var languageSelection = document.getElementById('tutorial-language');
+    languageSelection.removeEventListener('change', handleSettingsChange);
+    languageSelection.addEventListener('change', function(evt) {
+        evt.preventDefault();
+        
+        if (languageSelection.value === tutorial.language) {
+            return;
+        }
+        
+        tutorial.language = languageSelection.value;
+        
+        if (!languageCache[tutorial.language]) {
+            loadLanguageData();
+        } else {
+            Blockly.Msg = languageCache[tutorial.language];
+            changeLanguageInViewAndImages();
         }
     });
 }
 
 function initBlockly() {
     initBrickly();
-    workspace = Blockly.inject('workspace', {
+    workspace = Blockly.inject('blocklyDiv', {
         comments: true,
         disable: true,
         collapse: false,
@@ -338,9 +359,16 @@ function initBlockly() {
         variableDeclaration: true,
         robControls: true
     });
-    workspace.setDevice({
-        group : tutorial.robot
-    });
+    if (robots[tutorial.robot].specificRobot) {
+        workspace.setDevice({
+            group : tutorial.robot,
+            robot: robots[tutorial.robot].specificRobot
+        });
+    } else {
+        workspace.setDevice({
+            group : tutorial.robot
+        });
+    }
 
     Blockly.Xml.domToWorkspace(robots[tutorial.robot].program, workspace);
 }
@@ -360,14 +388,23 @@ function initBrickly() {
             minScale : .25,
             scaleSpeed : 1.1
         },
-        checkInTask : [ '-Brick', 'robConf' ],
+        checkInTask : [ 'start', '_def', 'event', '-Brick' ],
         variableDeclaration : true,
         robControls : true
     });
+
+
+    if (robots[tutorial.robot].specificRobot) {
+        configuration.setDevice({
+            group : tutorial.robot,
+            robot: robots[tutorial.robot].specificRobot
+        });
+    } else {
+        configuration.setDevice({
+            group : tutorial.robot
+        });
+    }
     
-    configuration.setDevice({
-        group : tutorial.robot
-    });
     configuration.setVersion('2.0');
     
     // Configurations can't be executed
@@ -420,6 +457,75 @@ function loadRobotData() {
     ajaxRequest.open('GET', relativePropertiesFilePath, false);
     ajaxRequest.overrideMimeType('text/plain');
     ajaxRequest.send();
+}
+
+function loadLanguageData() {
+    if (!tutorial.language || !!languageCache[tutorial.language]) {
+        return;
+    }
+    
+    var script = document.createElement('script');
+    
+    script.onload = function(evt) {
+        languageCache[tutorial.language] = JSON.parse(JSON.stringify(Blockly.Msg));
+        changeLanguageInViewAndImages();
+    }
+    
+    script.src = './robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/msg/js/' + tutorial.language.toLowerCase() + '.js';
+    
+    //remove Blockly.Msg, so the values are not simply overriden and change the values of the current selected value in the cache
+    Blockly.Msg = {};
+    document.head.appendChild(script);
+}
+
+function changeLanguageInViewAndImages() {
+    var currentStepIndex = tutorial.step.indexOf(currentStep);
+    persistCurrentProgramInStep(currentStep);
+    setRobotDataInWorkspaces();
+    for (var i = 0; i < tutorial.step.length; i++) {
+        if (!tutorial.step[i].solution) {
+            continue;
+        }
+        loadProgramOfStep(tutorial.step[i]);
+        persistCurrentProgramInStep(tutorial.step[i]);
+    }
+    currentStep = tutorial.step[currentStepIndex];
+    loadProgramOfStep(currentStep);
+}
+
+function setRobotDataInWorkspaces() {
+    if (workspace === null || !tutorial.robot || !robots[tutorial.robot]) {
+        return;
+    }
+    
+    if (configuration !== null) {
+        configuration.updateToolbox(robots[tutorial.robot].configurationToolbox);
+        if (robots[tutorial.robot].specificRobot) {
+            configuration.setDevice({
+                group : tutorial.robot,
+                robot: robots[tutorial.robot].specificRobot
+            });
+        } else {
+            configuration.setDevice({
+                group : tutorial.robot
+            });
+        }
+        configuration.clear();
+        Blockly.Xml.domToWorkspace(robots[tutorial.robot].configuration, configuration);
+    }
+    workspace.updateToolbox(robots[tutorial.robot].toolbox);
+    if (robots[tutorial.robot].specificRobot) {
+        workspace.setDevice({
+            group : tutorial.robot,
+            robot: robots[tutorial.robot].specificRobot
+        });
+    } else {
+        workspace.setDevice({
+            group : tutorial.robot
+        });
+    }
+    workspace.clear();
+    Blockly.Xml.domToWorkspace(robots[tutorial.robot].program, workspace);
 }
 
 /* Step settings handling functions */
@@ -523,12 +629,14 @@ function persistCurrentProgramInStep(step) {
                  return svgImage.svgGroup_.outerHTML;
              }).join(''),
              height = Math.max(... rootBlocks.map(function(rootBlock){
-                 var transform = rootBlock.svgGroup_.attributes.transform;
-                 return Math.ceil(rootBlock.height + (transform ? parseInt(transform.value.match(/translate\(\d+,(\d+)\)/)[1]) : 0));
+                 var transform = rootBlock.svgGroup_.attributes.transform,
+                     boxData = rootBlock.svgGroup_.getBBox();
+                 return Math.ceil(boxData.height + (transform ? parseInt(transform.value.match(/translate\(\d+,(\d+)\)/)[1]) : 0));
              })),
              width = Math.max(... rootBlocks.map(function(rootBlock){
-                 var transform = rootBlock.svgGroup_.attributes.transform;
-                 return Math.ceil(rootBlock.width + (transform ? parseInt(transform.value.match(/translate\((\d+),\d+\)/)[1]) : 0));
+                 var transform = rootBlock.svgGroup_.attributes.transform,
+                     boxData = rootBlock.svgGroup_.getBBox();
+                 return Math.ceil(boxData.width + (transform ? parseInt(transform.value.match(/translate\((\d+),\d+\)/)[1]) : 0));
              })),
              svg = document.createElement('svg');
          
@@ -645,9 +753,11 @@ function refreshSettings(filter) {
             checkType = formFields[i].tagName.toUpperCase() === 'INPUT' && ['checkbox', 'radio'].indexOf(formFields[i].type.toLowerCase()) !== -1;
             parent = tutorial;
         
-        //Replace old with new stepIndex
-        identifierChain.splice(2, 1, stepIndex);
-        formFields[i].name = identifierChain.join('.');
+        if (identifierChain[1] === 'step') {
+            //Replace old with new stepIndex
+            identifierChain.splice(2, 1, stepIndex);
+            formFields[i].name = identifierChain.join('.');
+        }
         
         //Remove tutorial, because parent starts at tutorial and not at window
         identifierChain.shift();
@@ -669,9 +779,9 @@ function refreshSettings(filter) {
                     if (checkType) {
                         formFields[i].checked = !!parent[identifierChain[j]];
                     } else if (formFields[i].tagName.toUpperCase() === 'TEXTAREA' && formFields[i].classList.contains('rich-text-edit')) {
-                        CKEDITOR.instances[formFields[i].id].setData(parent[identifierChain[j]]);
+                        CKEDITOR.instances[formFields[i].id].setData(typeof parent[identifierChain[j]] === 'undefined' ? '' : parent[identifierChain[j]]);
                     } else {
-                        formFields[i].value = parent[identifierChain[j]];
+                        formFields[i].value = typeof parent[identifierChain[j]] === 'undefined' ? '' : parent[identifierChain[j]];
                     }
                 }
             } else {
