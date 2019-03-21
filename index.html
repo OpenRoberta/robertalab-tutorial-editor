@@ -1,25 +1,41 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 	<meta charset="utf-8">
 	<title>Open Roberta Tutorial Editor</title>
-	<script src="./robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/blockly_compressed.js"></script>
-	<script src="./robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/blocks_compressed.js"></script>
-	<script src="./robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/blockly/msg/js/de.js"></script>
-	<script src="./src/ckeditor/ckeditor.js"></script>
-	<script src="./src/main.js"></script>
-	<link rel="stylesheet" type="text/css" href="./styles/main.css"></link>
-	<link rel="stylesheet" type="text/css" href="./styles/icons.css"></link>
-	<link rel="stylesheet" type="text/css" href="./robertalab/OpenRobertaParent/OpenRobertaServer/staticResources/css/typicons.css"></link>
+	<script src="./js/blockly/blockly_compressed.js"></script>
+	<script src="./js/blockly/blocks_compressed.js"></script>
+	<script src="./js/blockly/msg/js/de.js"></script>
+	<script src="./js/ckeditor/ckeditor.js"></script>
+	<script src="./js/plugin/filesaver/filesaver.min.js"></script>
+	<script src="./js/plugin/jszip/jszip.min.js"></script>
+	<script src="./js/plugin/jscookie/js.cookie.js"></script>
+	<script src="./js/FraunhoferIAIS/template.js"></script>
+	<script src="./js/FraunhoferIAIS/input.js"></script>
+	<script src="./js/FraunhoferIAIS/loading.js"></script>
+	<script src="./js/FraunhoferIAIS/modal.js"></script>
+	<script src="./js/FraunhoferIAIS/tab.js"></script>
+	<script src="./js/FraunhoferIAIS/notification.js"></script>
+	<script src="./js/FraunhoferIAIS/text.js"></script>
+	<script src="./js/FraunhoferIAIS/toggle.js"></script>
+	<script src="./js/FraunhoferIAIS/image.js"></script>
+	<script src="./js/FraunhoferIAIS/blockly.js"></script>
+	<script src="./js/FraunhoferIAIS/toolbox.js"></script>
+	<script src="./js/FraunhoferIAIS/roberta.js"></script>
+	<script src="./js/robotStub.js"></script>
+	<script src="./js/main.js"></script>
+	<link rel="stylesheet" type="text/css" href="./css/general.css">
+	<link rel="stylesheet" type="text/css" href="./css/icons.css">
+	<link rel="stylesheet" type="text/css" href="./css/loading.css">
+	<link rel="stylesheet" type="text/css" href="./css/typicons.css">
+	<link rel="stylesheet" type="text/css" href="./css/main.css">
 </head>
-
 <body>
 	<nav id="global-settings">
 		<section id="tutorial-settings">
 			<div class="form-row horizontal headline-input">
 				<label for="tutorial-name">Tutorial-Name:</label>
-				<input id="tutorial-name" type="text" name="tutorial.name" placeholder="Super-duper Tutorial!"/>
+				<input id="tutorial-name" type="text" name="tutorial.name" placeholder="Unter diesem Namen werden alle Benutzer dein Tutorial sehen" pattern=".{1,35}" title="Der Name sollte nicht länger als 35 Zeichen sein."/>
 			</div>
 			<div class="form-row horizontal small-input">
 				<label for="tutorial-robot">Roboter:</label>
@@ -31,28 +47,49 @@
 				<select id="tutorial-language" name="tutorial.language">
 					<option value="DE" selected="selected">Deutsch</option>
 					<option value="EN">English</option>
-					<option value="ES">Spanish</option>
-					<option value="PT">Portuguese</option>
-					<option value="IT">Italian</option>
-					<option value="FR">French</option>
-					<option value="CA">Catalan</option>
-					<option value="RU">Russian</option>
-					<option value="CS">Czech</option>
-					<option value="PL">Polish</option>
-					<option value="TR">Turkish</option>
-					<option value="NL">Dutch</option>
-					<option value="FI">Finish</option>
-					<option value="DA">Danish</option>
+					<option value="SV">Svenska</option>
+					<option value="ES">Espa&#x00F1;ol</option>
+					<option value="PT">Portugu&#x00EA;s</option>
+					<option value="IT">Italiano</option>
+					<option value="FR">Fran&#x00E7;ais</option>
+					<option value="CA">Catal&#x00E1;</option>
+					<option value="RU">&#x0420;&#x0443;&#x0441;&#x0441;&#x043A;&#x0438;&#x0439;</option>
+					<option value="CS">&#x010C;e&#x0161;tina</option>
+					<option value="PL">Polski</option>
+					<option value="TR">T&#x00FC;rk&#x00E7;e</option>
+					<option value="NL">Nederlands</option>
+					<option value="FI">Suomi</option>
+					<option value="DA">Dansk</option>
+					<option value="zh-hans">&#x7C21&#x4F53&#x4E2D&#x6587</option>
+					<option value="zh-hant">&#xBCF2&#x9AD4&#x4E2D&#x6587</option>
 				</select>
 			</div>
-			<button id="tutorial-text-menu-toggle" class="toggle icon-button" type="button" data-target="tutorial-text-menu" data-initial="none"><span class="icon icon-gear"></span></button>
-			<section id="tutorial-text-menu" class="modal">
-				<button class="close icon-button" type="button"><span class="icon icon-close-circle"></span></button>
+			<button id="tutorial-text-menu-toggle" class="iais-toggle icon-button" type="button" data-target="tutorial-text-menu" data-state="false"><span class="icon icon-gear icon-theme-light"></span></button>
+			<section id="tutorial-text-menu" class="iais-modal">
+	        	<button class="iais-close icon-button" type="button"><span class="icon icon-close-circle icon-theme-light"></span></button>
 				<section>
 					<div class="form-row vertical">
-						<label for="tutorial-overview">Einführungstext: </label>
-						<textarea id="tutorial-overview" class="mid rich-text-edit" name="tutorial.overview" placeholder="Dieser Text wird am Anfang in einem Popup angezeigt, sofern ein Text angegeben wird."></textarea>
+						<label for="tutorial-time">Dauer: </label>
+						<input id="tutorial-time" class="headline-input" type="text" name="tutorial.time" placeholder="XX Minuten/Stunden ..."/>
 					</div>
+					<div class="form-row vertical">
+						<label for="tutorial-age">Altersgruppe: </label>
+						<input id="tutorial-age" class="headline-input" type="text" name="tutorial.age" placeholder="X bis X Jahre"/>
+					</div>
+					<hr />
+					<div class="form-row vertical">
+						<label for="tutorial-overview-goal">Lernziel: </label>
+						<input id="tutorial-overview-goal" class="headline-input" type="text" name="tutorial.overview.goal" placeholder="Du lernst mit ... umzugehen."/>
+					</div>
+					<div class="form-row vertical">
+						<label for="tutorial-overview-previous">Vorkenntnisse: </label>
+						<input id="tutorial-overview-previous" class="headline-input" type="text" name="tutorial.overview.previous" placeholder="Su solltest schon mal ... haben."/>
+					</div>
+					<div class="form-row vertical">
+						<label for="tutorial-overview-description">Einführungstext: </label>
+						<textarea id="tutorial-overview-description" class="mid rich-text-edit" name="tutorial.overview.description" placeholder="Dieser Text wird am Anfang in einem Popup angezeigt, sofern ein Text angegeben wird."></textarea>
+					</div>
+					<hr />
 					<div class="form-row vertical">
 						<label for="tutorial-end">Schluss-Text: </label>
 						<textarea id="tutorial-end" class="mid rich-text-edit" name="tutorial.end" placeholder="Dieser Text wird zum Schluss in einem Popup angezeigt, sofern ein Text angegeben wird."></textarea>
@@ -68,11 +105,10 @@
 				<!-- button id="clear-program-button" type="button">Programm für diesen Schritt leeren</button -->
 			</div>
 		</section>
-		<label id="upload-label" for="upload" class="icon-button icon-size-big" title="Tutorial hochladen"><span class="icon icon-size-big icon-upload-line"></span></label>
+		<label id="upload-label" for="upload" class="icon-button icon-size-big" title="Tutorial laden"><span class="icon icon-size-big icon-robot-search icon-theme-light"></span></label>
 		<input id="upload" type="file" name="tutorial" accept="application/json"/>
-		<button id="download" type="button" class="icon-button icon-size-big" title="Tutorial herunterladen"><span class="icon icon-size-big icon-download"></span></button>
+		<button id="download" type="button" class="icon-button icon-size-big" title="Tutorial speichern"><span class="icon icon-size-big icon-save icon-theme-light"></span></button>
 	</nav>
-	
     <div id="configuration">
         <div id="brickly">
             <div id="bricklyDiv"></div>
@@ -82,18 +118,30 @@
 		<div id="blocklyDiv"></div>
 	</section>
 	<section id="step-settings">
-		<section id="step-general" class="visible">
+		<section id="step-general" class="iais-visible">
 			<div class="form-row vertical">
 				<label for="step-headline">Schritt-Überschrift: </label>
-				<input id="step-headline" class="headline-input" type="text" name="tutorial.step.0.header" placeholder="Die Überschrift des Schrittes"/>
+				<input id="step-headline" class="headline-input" type="text" name="tutorial.step.0.setHeader" placeholder="NEPO richtig kennenlernen"/>
 			</div>
 			<div class="form-row vertical">
 				<label for="step-tip">Hinweis: </label>
-				<textarea id="step-tip" class="small" name="tutorial.step.0.tip" placeholder="Ein Hinweis, der über den Anweisungen angezeigt wird."></textarea>
+				<textarea id="step-tip" class="small" name="tutorial.step.0.tip" placeholder="Ein Hinweis, der über den Instruktionen angezeigt wird."></textarea>
 			</div>
 			<div class="form-row horizontal">
-				<input id="step-toolbox-contraint" type="checkbox" name="tutorial.step.0.toggleToolboxLimit" value="1"/>
-				<label for="step-toolbox-contraint">Nur Blöcke aus dem Programm zur Auswahl stellen</label>
+				<input id="step-add-number-to-header" type="checkbox" name="tutorial.step.0.addStepNumberToHeader" value="1"/>
+				<label for="step-add-number-to-header">"Schritt X: " vor der Überschrift einfügen.</label>
+			</div>
+			<div class="form-row horizontal">
+				<input id="step-toolbox-program" type="radio" name="tutorial.step.0.toggleToolboxLimit" value="program"/>
+				<label for="step-toolbox-program">Nur Blöcke aus dem Programm zur Auswahl stellen</label>
+			</div>
+			<div class="form-row horizontal">
+				<input id="step-toolbox-beginner" type="radio" name="tutorial.step.0.toggleToolboxLimit" value="beginner"/>
+				<label for="step-toolbox-beginner">Anfänger Blöcke zur Auswahl stellen</label>
+			</div>
+			<div class="form-row horizontal">
+				<input id="step-toolbox-expert" type="radio" name="tutorial.step.0.toggleToolboxLimit" value="expert"/>
+				<label for="step-toolbox-expert">Experten Blöcke zur Auswahl stellen</label>
 			</div>
 			<div class="form-row horizontal">
 				<input id="step-maxBlocks" type="checkbox" name="tutorial.step.0.toggleMaxBlocks" value="1"/>
@@ -101,7 +149,7 @@
 			</div>
 			<div class="form-row horizontal right-xxl">
 				<label for="step-maxBlocks-add">plus:</label>
-				<input id="step-maxBlocks-add" class="small-input" type="number" name="tutorial.step.0.addMaxBlocks" value="0" min="0"/>
+				<input id="step-maxBlocks-add" class="small-input" type="number" name="tutorial.step.0.addMaxBlocks" value="0" min="0" title="Werte gelten auch als Bklöcke! Der Fahre vorwärts Block (EV3) gilt also als 3, der Zeige Bild Block (calliope) als 2."/>
 			</div>
 			<div class="form-row horizontal">
 				<input id="step-solution" type="checkbox" name="tutorial.step.0.toggleSolution" value="1"/>
@@ -112,50 +160,68 @@
 				<textarea id="step-instructions" class="large rich-text-edit" name="tutorial.step.0.instruction" placeholder="Der Experten-Modus"></textarea>
 			</div>	
 		</section>
-		
 		<section id="step-quiz">
 			<button id="step-quiz-add-question" type="button">Frage hinzufügen</button>
 		</section>
-		
 		<section id="step-settings-navigation">
 			<button id="view-step-general" class="active" type="button">Allgemein</button>
 			<button id="view-step-quiz" type="button">Quiz</button>
+			
+			<label id="step-import-program-from-lab" for="step-import-program-from-lab-input" class="icon-button" title="Programm für diesen Schritt aus Lab-Export-Datei importieren"><span class="icon icon-file-hand icon-theme-light"></span></label>
+			<input type="file" id="step-import-program-from-lab-input"  name="step.program" accept="application/xml"/>
+			<button id="step-import-program-from-previous" class="icon-button" type="button" title="Programm für diesen Schritt aus vorhergehendem Schritt übernehmen"><span class="icon icon-robot-production icon-theme-light"></span></button>
 		</section>
 	</section>
 	<section id="templates">
-		<div class="form-row horizontal">
-		</div>
-		<button class="step-button" type="button"></button>
-		<div class="step-quiz-question form-group">
+		<div id="form-row" class="form-row horizontal"></div>
+		<button id="step-button" class="step-button" type="button"></button>
+		<div id="step-quiz-question" class="step-quiz-question form-group">
 			<div class="form-row horizontal">
 				<label class="step-quiz-question-label">Frage:</label>
-				<input class="step-quiz-question-input" id="" name="" placeholder="Wie ist dein Tag?" type="text">
+				<input class="step-quiz-question-input" id="" name="" placeholder="Wie heißt die beste Programmiersprache der Welt?" type="text">
 			</div>
 			<div class="step-quiz-answers">
 				<button class="step-quiz-answer-button" type="button">Antwort hinzufügen</button>
+				<button class="step-quiz-remove-question-button" type="button">Frage löschen</button>
 			</div>
 		</div>
-		<div class="step-quiz-answer form-group">
+		<div id="step-quiz-answer" class="step-quiz-answer form-group">
+	        <button class="iais-close icon-button" type="button"><span class="icon icon-close-thick icon-theme-light"></span></button>
 			<div class="form-row horizontal">
 				<label class="step-quiz-answer-label">Antwort:</label>
-				<input class="step-quiz-answer-input" id="" name="" placeholder="toll!" type="text" pattern="^[^!].+">
+				<input class="step-quiz-answer-input" id="" name="" placeholder="NEPO" type="text" pattern="^[^!].*" title="Eine Antwort darf nicht mit einem Ausrufezeichen anfangen.">
 			</div>
 			<div class="form-row horizontal">
 				<input class="step-quiz-answer-correct-input" id="" name="" value="1" type="checkbox">
 				<label class="step-quiz-answer-correct-label">Richtige Antwort</label>
 			</div>
 		</div>
-		<div class="double-opt-popup">
-			<article>
-				<header>
-					<h4 class="double-opt-header"></h4>
-				</header>
-				<p class="double-opt-info"></p>
-				<button class="double-opt-accept" type="button">Akzeptieren</button>
-				<button class="double-opt-deny" type="button">Ablehnen</button>
-			</article>
-		</div>
+	    <div id="modal-popup-message" class="iais-modal">
+	        <button class="iais-close icon-button" type="button"><span class="icon icon-close-circle icon-theme-light"></span></button>
+	        <section>
+	            <header><h5></h5></header>
+	            <p></p>
+	        </section>
+	    </div>
+	    <div id="modal-popup-confirm" class="iais-modal">
+	        <button class="iais-close icon-button" type="button"><span class="icon icon-close-circle icon-theme-light"></span></button>
+	        <section>
+	            <header><h4></h4></header>
+	            <p></p>
+	            <span class="iais-confirm"><span class="icon icon-check-circle"></span> Zustimmen</span>
+	            <span class="iais-close"><span class="icon icon-close-circle"></span> Ablehnen</span>
+	        </section>
+	    </div>
+	    <div id="notification" class="iais-notification">
+	        <span class="icon icon-theme-light icon-close-circle iais-close"></span>
+	        <span class="icon icon-size-big icon-theme-light icon-check-circle type-success"></span>
+	        <span class="icon icon-size-big icon-theme-light icon-warning type-warning"></span>
+	        <span class="icon icon-size-big icon-theme-light icon-info-circle type-info"></span>
+	        <article>
+	            <header><strong></strong></header>
+	            <p></p>
+	        </article>
+	    </div>
 	</section>
 </body>
-
 </html>

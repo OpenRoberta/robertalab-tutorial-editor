@@ -1,0 +1,517 @@
+@font-face { font-family: 'Roboto';
+             src: url('fonts/Roboto-Regular.ttf') format('truetype'); 
+}
+@font-face { font-family: 'Roboto';
+             src: url('fonts/Roboto-Italic.ttf') format('truetype');
+             font-style: italic; 
+}
+@font-face { font-family: 'Roboto';
+             src: url('fonts/Roboto-Bold.ttf') format('truetype');
+             font-weight: bold; 
+             }
+@font-face { font-family: 'Roboto';
+             src: url('fonts/Roboto-BoldItalic.ttf') format('truetype');
+             font-weight: bold;
+             font-style: italic; 
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Roboto', sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+#templates {
+	display: none;
+}
+
+.form-group {
+	margin: .5em;
+	padding: .5em; 
+	box-shadow: 0 0 2px 0px #c0c0c0 inset;
+}
+
+#global-settings {
+	position: fixed;
+	top: 0;
+	left:0;
+	right: 0;
+	display: flex;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-items : flex-start;
+	display: -ms-flexbox;
+	-ms-flex-wrap : none;
+	-ms-flex-pack : justify;
+	-ms-flex-align : stretch;
+	height: 8em;
+	padding: 1em;
+	box-shadow: 0 3px 5px 0 #aeaeaf;
+	z-index: 1;
+}
+
+/**
+ * The toolbox automatically scales iteself in relation to the workspace.
+ * Thats why #blockly and #toolbox are emtpy.
+ */
+#blockly {
+}
+
+#blockly > #toolbox {
+}
+
+#brickly {
+	display: none;
+}
+
+#blockly > #blocklyDiv {
+	position: fixed;
+	top: 8em;
+	left: 0;
+	bottom: 0;
+	width: 70vw;
+}
+
+#step-settings {
+	position: fixed;
+	top: 8em;
+	right: 0;
+	bottom: 0;
+	width: 30vw;
+	border-left: 4px solid #C0C0C0;
+	overflow: hidden;
+	padding: 1em;
+}
+
+#step-general,
+#step-quiz {
+	position: absolute;
+	display: block;
+	top: 6em;
+	left: 1em;
+	bottom: 1em;
+	width: 100%;
+	margin: 1em;
+	margin-left: 0;
+	transition: margin-left .5s ease;
+	overflow-x: hidden;
+	overflow-y: auto;
+	border-right: 2em solid transparent;
+}
+
+#step-settings-navigation {
+	position: absolute;
+	display: block;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 5em;
+	padding: 1em;
+	border-bottom: 2px solid #c0c0c0;
+}
+
+#step-import-program-from-previous,
+#step-import-program-from-lab {
+	float: right;
+	margin: 0 .25em;
+}
+
+#step-general:not(.iais-visible) {
+	margin-left: -110%;
+}
+
+#step-quiz:not(.iais-visible) {
+	margin-left: 110%;
+}
+
+#tutorial-settings {
+	position: relative;
+	display: inline-block;
+	width: 40rem;
+	height: 100%;
+	vertical-align: top;
+	padding-right: 2rem;
+	margin-right: 2rem;
+}
+
+#upload-label,
+#download {
+	display: inline-block;
+	margin: 1rem;
+}
+
+#upload {
+	display: none;
+}
+
+#step-navigation {
+	-ms-flex-preferred-size: 0;
+	flex-basis: 0;
+	-webkit-box-flex: 1;
+	-ms-flex-positive: 1;
+	flex-grow: 1;
+	position: relative;
+	display: inline-block;
+	height: 100%;
+	vertical-align: top;
+	margin-top: .375em;
+}
+
+.step-button {
+	position: relative;
+	display: inline-block;
+	width: 48px;
+	height: 48px;
+	padding: .5em;
+	border-radius: 0 2px 2px 0;
+	line-height: 1;
+	margin: 0 17px 0 0;
+	font-size: 24px;
+	border: 0 none;
+	background-color: #EAF0BB;
+	box-sizing: border-box;
+	color: #777;
+}
+
+.step-button:hover {
+	background-color: #EAF0BB;
+}
+
+.step-button:after {
+	content: " ";
+	position: absolute;
+	top: 0;
+	right: -17px;
+	width: 17px;
+	height: 48px;
+	background-image: url(./svg/step_connector.svg);
+	display: inline-block;
+}
+
+.step-button:last-of-type:after {
+	background-image: url(./svg/step_connector_last.svg);
+}
+
+.step-button.active {
+	background-color: #BACC1E;
+	z-index: 10;
+}
+
+.step-button.active:hover {
+	background-color: #BACC1E;
+}
+
+.step-button:not(:first-child).active:before {
+	content: " ";
+	position: absolute;
+	top: 0;
+	left: -17px;
+	width: 17px;
+	height: 48px;
+	background-image: url(./svg/step_connector_before_active.svg);
+	display: inline-block;
+}
+
+.step-button.active:after {
+	background-image: url(./svg/step_connector_active.svg);
+}
+
+.step-button.active:last-of-type:after {
+	background-image: url(./svg/step_connector_active_last.svg);
+}
+
+.step-button.active,
+.step-button:hover {
+	color: #333;
+}
+
+.form-row {
+	display: block;
+	width: 100%;
+	margin-bottom: .5em;
+}
+
+.form-row:before,
+.form-row:after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+.form-row.horizontal > label {
+	display: block;
+	min-width: 25%;
+	float: left;
+}
+
+.form-row.horizontal > input[type="radio"] ~ label,
+.form-row.horizontal > input[type="checkbox"] ~ label {
+	min-width: 85%;
+	float: right;
+}
+
+.form-row.horizontal > input,
+.form-row.horizontal > select,
+.form-row.horizontal > textarea {
+	display: block;
+	width: 75%;
+	float: right;
+}
+
+.form-row.horizontal > input[type="checkbox"],
+.form-row.horizontal > input[type="radio"] {
+	width: 15%;
+	margin: 0;
+	float: left;
+}
+
+.form-row.vertical > label,
+.form-row.vertical > input,
+.form-row.vertical > select,
+.form-row.vertical > textarea {
+	display: block;
+	width: 100%;
+}
+
+textarea {
+	max-width: 100%;
+}
+
+textarea.small {
+	height: 5em;
+}
+
+textarea.mid {
+	height: 15em;
+}
+
+textarea.large {
+	height: 30em;
+}
+
+#step-menu {
+	font-size: 0;
+	width: 54px;
+	position: relative;
+}
+
+#step-menu > .mini-button {
+	width: 20px;
+	height: 20px;
+	margin: 0;
+	padding: 2px;
+	border: 0 none;
+	background-color: transparent;
+	box-sizing: border-box;
+	cursor: pointer;
+	line-height: 16px;
+	font-size: 16px;
+	z-index: 20;
+}
+
+#step-menu > #inject-step-after,
+#step-menu > #inject-step-before {
+	position: absolute;
+	top: -35px;
+}
+
+#step-menu > #inject-step-after,
+#step-menu > #inject-step-before,
+#step-menu > #remove-step-button {
+	font-weight: 700;
+	color: #777;
+	font-size: 1.1rem;
+}
+
+
+#step-menu > #inject-step-after:hover,
+#step-menu > #inject-step-before:hover {
+	color: #333;
+}
+
+#step-menu > #remove-step-button:hover {
+	color: #E2001A;
+}
+
+#step-menu > #inject-step-before {
+	left: -22px;
+}
+
+#step-menu > #inject-step-after {
+	right: -9px;
+}
+
+#step-menu > #remove-step-button {
+	position: absolute;
+	right: 2px;
+	top: -66px;
+}
+.step-quiz-remove-question-button {
+	float: right;
+}
+
+.step-quiz-answer {
+	position: relative;
+}
+
+.step-quiz-answer .iais-close {
+	position: absolute;
+	bottom: 1px;
+	right: 1px;
+}
+
+.step-quiz-remove-question-button,
+.step-quiz-answer .iais-close {
+	background-color: #E2001A;
+}
+
+.step-quiz-answer:first-of-type:last-of-type .iais-close {
+	display: none;
+}
+
+.step-quiz-remove-question-button:hover,
+.step-quiz-answer .iais-close:hover {
+	background-color: #FB001D;
+}
+
+.icon-button.icon-size-big {
+	width:54px;
+	height:54px;
+	padding: 3px;
+	line-height: 48px;
+}
+
+.icon-button.icon-size-big > .icon {
+	padding-right: 0;
+	margin-bottom: 0;
+}
+
+#tutorial-text-menu-toggle {
+	position: absolute;
+	top: -3px;
+	right: -3px;
+}
+
+.modal {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 9999;
+	background-color: rgba(0, 0, 0, .25);
+	padding: 2rem;
+}
+
+.modal > section {
+	width: 1200px;
+	max-height: 100%;
+	overflow-y: auto;
+	margin: 0 auto;
+	padding: 30px;
+	background-color: #fff;
+}
+
+.modal > button.close {
+	position: absolute;
+	top: 2rem;
+	right: 50%;
+	transform: translate(600px);
+}
+
+#step-menu {
+	/*! transition: margin-left .3s ease; */
+}
+
+.step-button.active ~ #step-menu {
+	display: block;
+}
+
+.step-button.active:first-child:nth-last-child(2) ~ #step-menu #remove-step-button {
+	display: none;
+}
+
+.right-xxl {
+	float: right;
+	width: 85%;
+}
+
+.right-big {
+	float: right;
+	width: 75%;
+}
+
+.right-small {
+	float: right;
+	width: 25%;
+}
+
+.right-xs {
+	float: right;
+	width: 15%;
+}
+
+.leftt-xxl {
+	float: left;
+	width: 85%;
+}
+
+.left-big {
+	float: left;
+	width: 75%;
+}
+
+.left-small {
+	float: left;
+	width: 25%;
+}
+
+.left-xs {
+	float: left;
+	width: 15%;
+}
+
+.double-opt-popup {
+	position: fixed;
+	display: block;
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.1);
+	z-index: 9999;
+}
+
+.double-opt-popup > article {
+	diplay: block;
+	margin: 1em auto;
+	width: 30em;
+	padding: 1em;
+	background-color: #fff;
+}
+
+.double-opt-popup > article > .double-opt-accept {
+	float: left;
+}
+
+.double-opt-popup > article > .double-opt-deny {
+	float: right;
+}
+
+.double-opt-popup > article:after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+.rotate {
+	display: inline-block;
+	transform: rotate(45deg);
+    height: 1rem;
+    width: 1rem;
+}
