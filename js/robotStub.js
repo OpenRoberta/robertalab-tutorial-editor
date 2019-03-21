@@ -1,5 +1,9 @@
-window.addEventListener('load', function(){
-    if (FraunhoferIAIS.Blockly && Object.keys(FraunhoferIAIS.Blockly.robotGroups).length === 0) {
+var FraunhoferIAIS = FraunhoferIAIS || {};
+
+FraunhoferIAIS.Blockly = FraunhoferIAIS.Blockly || {};
+
+window.addEventListener('load', function() {
+    if (Object.keys(FraunhoferIAIS.Blockly.robotGroups).length === 0) {
         var robots = {
                 "1": {
                     "name": "wedo",
@@ -124,7 +128,7 @@ window.addEventListener('load', function(){
         }
     }
 
-    if (FraunhoferIAIS.Blockly && Object.keys(FraunhoferIAIS.Blockly.robotCache).length === 0) {
+    if (Object.keys(FraunhoferIAIS.Blockly.robotCache).length === 0) {
         FraunhoferIAIS.Blockly.robotCache = {
             wedo: {
                 "cmd": "setRobot",
