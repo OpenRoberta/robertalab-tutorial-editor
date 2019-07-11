@@ -130,38 +130,6 @@ button.iais-active {
 	background-color: #C7D92B;
 }
 
-.icon-button {
-	width: 32px;
-	height: 32px;
-	border: 0 none;
-	padding: 8px 4px;
-	line-height: 16px;
-	margin: 0;
-	background-color: transparent;
-}
-
-.icon-button > .icon {
-	vertical-align: top;
-}
-
-.icon-button > .icon:after {
-	content: '';
-	position: absolute;
-	top: -8px;
-	bottom: -8px;
-	left: -4px;
-	right: -4px;
-	height: 32px;
-	width: 32px;
-	z-index: -1;
-	background-color: #BACC1E;
-	border-radius: 2px;
-}
-
-.icon-button:hover > .icon:after {
-	background-color: #C7D92B;
-}
-
 .icon-label {
 	height: 30px;
 	padding: 3px;
@@ -281,6 +249,7 @@ input[type="file"]:not(.show) {
 	right: 50%;
 	transform: translate(600px);
 	cursor: pointer;
+	border-radius: 2px 0 2px 2px !important;
 }
 
 .iais-modal > .iais-close > .icon {

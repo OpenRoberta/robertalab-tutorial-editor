@@ -64,9 +64,13 @@
 					<option value="zh-hant">&#xBCF2&#x9AD4&#x4E2D&#x6587</option>
 				</select>
 			</div>
-			<button id="tutorial-text-menu-toggle" class="iais-toggle icon-button" type="button" data-target="tutorial-text-menu" data-state="false"><span class="icon icon-gear icon-theme-light"></span></button>
+			<span id="tutorial-text-menu-toggle" 
+			      class="iais-toggle icon icon-theme-light icon-style-button icon-button-tutorial-green icon-gear"
+				  data-target="tutorial-text-menu" 
+				  data-state="false"
+				  ></span>
 			<section id="tutorial-text-menu" class="iais-modal">
-	        	<button class="iais-close icon-button" type="button"><span class="icon icon-close-circle icon-theme-light"></span></button>
+	        	<span class="iais-close icon icon-style-button icon-button-tutorial-green icon-close-circle icon-theme-light"></span>
 				<section>
 					<div class="form-row vertical">
 						<label for="tutorial-time">Dauer: </label>
@@ -105,9 +109,15 @@
 				<!-- button id="clear-program-button" type="button">Programm für diesen Schritt leeren</button -->
 			</div>
 		</section>
-		<label id="upload-label" for="upload" class="icon-button icon-size-big" title="Tutorial laden"><span class="icon icon-size-big icon-robot-search icon-theme-light"></span></label>
+		<label id="upload-label" 
+			   for="upload" 
+			   class="icon icon-style-button icon-button-tutorial-green icon-size-big icon-theme-light icon-robot-search" 
+			   data-icon-title="Tutorial laden"></label>
 		<input id="upload" type="file" name="tutorial" accept="application/json"/>
-		<button id="download" type="button" class="icon-button icon-size-big" title="Tutorial speichern"><span class="icon icon-size-big icon-save icon-theme-light"></span></button>
+		<button id="download" 
+				type="button" 
+				class="icon icon-style-button icon-button-tutorial-green icon-size-big icon-theme-light icon-save" 
+				data-icon-title="Tutorial speichern"></button>
 	</nav>
     <div id="configuration">
         <div id="brickly">
@@ -167,9 +177,21 @@
 			<button id="view-step-general" class="active" type="button">Allgemein</button>
 			<button id="view-step-quiz" type="button">Quiz</button>
 			
-			<label id="step-import-program-from-lab" for="step-import-program-from-lab-input" class="icon-button" title="Programm für diesen Schritt aus Lab-Export-Datei importieren"><span class="icon icon-file-hand icon-theme-light"></span></label>
-			<input type="file" id="step-import-program-from-lab-input"  name="step.program" accept="application/xml"/>
-			<button id="step-import-program-from-previous" class="icon-button" type="button" title="Programm für diesen Schritt aus vorhergehendem Schritt übernehmen"><span class="icon icon-robot-production icon-theme-light"></span></button>
+			<label id="step-import-program-from-lab" 
+				   for="step-import-program-from-lab-input" 
+				   class="icon icon-theme-light icon-style-button icon-button-tutorial-green icon-file-hand" 
+				   data-icon-title="Programm für diesen Schritt aus Lab-Export-Datei importieren"
+				   ></label>
+			<input type="file" 
+				   id="step-import-program-from-lab-input"  
+				   name="step.program" 
+				   accept="application/xml"
+				   />
+			<button id="step-import-program-from-previous" 
+					class="icon icon-theme-light icon-style-button icon-button-tutorial-green icon-robot-production" 
+					type="button" 
+					data-icon-title="Programm für diesen Schritt aus vorhergehendem Schritt übernehmen"
+					></button>
 		</section>
 	</section>
 	<section id="templates">
@@ -197,14 +219,14 @@
 			</div>
 		</div>
 	    <div id="modal-popup-message" class="iais-modal">
-	        <button class="iais-close icon-button" type="button"><span class="icon icon-close-circle icon-theme-light"></span></button>
+	        	<span class="iais-close icon icon-style-button icon-button-tutorial-green icon-close-circle icon-theme-light"></span>
 	        <section>
 	            <header><h5></h5></header>
 	            <p></p>
 	        </section>
 	    </div>
 	    <div id="modal-popup-confirm" class="iais-modal">
-	        <button class="iais-close icon-button" type="button"><span class="icon icon-close-circle icon-theme-light"></span></button>
+	        	<span class="iais-close icon icon-style-button icon-button-tutorial-green icon-close-circle icon-theme-light"></span>
 	        <section>
 	            <header><h4></h4></header>
 	            <p></p>
@@ -213,7 +235,7 @@
 	        </section>
 	    </div>
 	    <div id="notification" class="iais-notification">
-	        <span class="icon icon-theme-light icon-close-circle iais-close"></span>
+	        <span class="iais-close icon icon-style-button icon-close-circle icon-theme-light"></span>
 	        <span class="icon icon-size-big icon-theme-light icon-check-circle type-success"></span>
 	        <span class="icon icon-size-big icon-theme-light icon-warning type-warning"></span>
 	        <span class="icon icon-size-big icon-theme-light icon-info-circle type-info"></span>

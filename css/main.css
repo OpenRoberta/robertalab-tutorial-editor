@@ -397,33 +397,6 @@ textarea.large {
 	right: -3px;
 }
 
-.modal {
-	position: fixed;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	z-index: 9999;
-	background-color: rgba(0, 0, 0, .25);
-	padding: 2rem;
-}
-
-.modal > section {
-	width: 1200px;
-	max-height: 100%;
-	overflow-y: auto;
-	margin: 0 auto;
-	padding: 30px;
-	background-color: #fff;
-}
-
-.modal > button.close {
-	position: absolute;
-	top: 2rem;
-	right: 50%;
-	transform: translate(600px);
-}
-
 #step-menu {
 	/*! transition: margin-left .3s ease; */
 }
@@ -514,4 +487,17 @@ textarea.large {
 	transform: rotate(45deg);
     height: 1rem;
     width: 1rem;
+}
+
+.icon.icon-style-button {
+	border-radius: 2px;
+}
+
+.icon.icon-style-button.icon-button-tutorial-green {
+	background-color: #BACC1E;
+}
+
+
+.icon.icon-style-button.icon-button-tutorial-green:hover {
+	background-color: #C7D92B;
 }
