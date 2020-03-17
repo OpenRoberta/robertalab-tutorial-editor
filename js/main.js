@@ -1,91 +1,101 @@
 var FraunhoferIAIS = FraunhoferIAIS || {};
 
-FraunhoferIAIS.Tutorial = FraunhoferIAIS.Tutorial || {};
-
-FraunhoferIAIS.Tutorial.defaults = FraunhoferIAIS.Tutorial.defaults || {
-    robot: 'ev3lejosv1',
-    language: 'DE',
-    step: {
-        header: ''
-    },
-    question: {
-        question: '',
-        answer: ['']
-    },
-    /*
-    oldStep: {
-        header: '',
-        tip: '',
-        instruction: '',
-        toolbox: null,
-        maxBlocks: null,
-        solution: null,
-        program: null,
-        quiz: []
-    },
-    */
-};
-
-FraunhoferIAIS.Tutorial.tutorial = FraunhoferIAIS.Tutorial.tutorial || {
-    name: '',
-    overview: {
-        goal: '',
-        previous: '',
-        description: ''
-    },
-    robot: FraunhoferIAIS.Tutorial.defaults.robot,
-    language: FraunhoferIAIS.Tutorial.defaults.language,
-    step : [JSON.parse(JSON.stringify(FraunhoferIAIS.Tutorial.defaults.step))]
-}
-
-FraunhoferIAIS.Tutorial.currentStep = FraunhoferIAIS.Tutorial.currentStep || FraunhoferIAIS.Tutorial.tutorial.step[0];
-
-FraunhoferIAIS.Tutorial.getCurrentStepIndex = function() {
-    return FraunhoferIAIS.Tutorial.getStepIndex(FraunhoferIAIS.Tutorial.currentStep);
-}
-
-FraunhoferIAIS.Tutorial.getStepIndex = function (selectedStep) {
-    return FraunhoferIAIS.Tutorial.tutorial.step.indexOf(selectedStep);
-}
-
-FraunhoferIAIS.Tutorial.initFormFields = function () {
-    var robotSelection = document.getElementById('tutorial-robot'),
-        robotList = FraunhoferIAIS.Blockly.getRobotListForFrontend();
+FraunhoferIAIS.Tutorial = function (Tutorial) { //Tutorial = FraunhoferIAIS.Tutorial
+    Tutorial.defaults = {
+        robot: 'ev3lejosv1',
+        language: 'DE',
+        step: {
+            header: ''
+        },
+        question: {
+            question: '',
+            answer: ['']
+        },
+        /*
+        oldStep: {
+            header: '',
+            tip: '',
+            instruction: '',
+            toolbox: null,
+            maxBlocks: null,
+            solution: null,
+            program: null,
+            quiz: []
+        },
+        */
+    };
     
-    robotList.forEach(function(robot) {
-        var option = document.createElement('option');
-        option.value = robot.value;
-        option.textContent = robot.textContent;
-        if (robot.value === FraunhoferIAIS.Tutorial.tutorial.robot) {
-            option.selected = true;
+    Tutorial.tutorial = Tutorial.tutorial || {
+        name: '',
+        overview: {
+            goal: '',
+            previous: '',
+            description: ''
+        },
+        robot: Tutorial.defaults.robot,
+        language: Tutorial.defaults.language,
+        step : [JSON.parse(JSON.stringify(Tutorial.defaults.step))]
+    };
+
+    Tutorial.currentStep = Tutorial.currentStep || Tutorial.tutorial.step[0];
+
+    Tutorial.getCurrentStepIndex = function() {
+        return Tutorial.getStepIndex(Tutorial.currentStep);
+    }
+
+    Tutorial.getStepIndex = function (selectedStep) {
+        return Tutorial.tutorial.step.indexOf(selectedStep);
+    }
+
+    Tutorial.initFormFields = function () {
+        
+        if (!FraunhoferIAIS.Blockly || !FraunhoferIAIS.Input || !CKEDITOR) {
+            console.error('Required FraunhoferIAIS.Blockly and FraunhoferIAIS.Input were not provided.');
+            return;
         }
-        robotSelection.appendChild(option);
-    });
-    
-    FraunhoferIAIS.Input.addHandleInputChangeCallback('tutorial.robot', function(oldRobot, newRobot) {
-        FraunhoferIAIS.Blockly.replaceRobot(newRobot);
-    });
-    
-    FraunhoferIAIS.Input.addHandleInputChangeCallback('tutorial.language', function(oldLanguage, newLanguage) {
-        FraunhoferIAIS.Blockly.replaceLanguage(newLanguage)
-            .then(FraunhoferIAIS.Tutorial.refreshProgramSVGs());
-    });
-    
-    CKEDITOR.on('instanceCreated', function(event) {
-        event.editor.on('change', function () {
-            var textarea = document.getElementById(event.editor.name),
-                changeEvent = new Event('change');
-            textarea.value = event.editor.getData();
-            textarea.dispatchEvent(changeEvent);
+        
+        var robotSelection = document.getElementById('tutorial-robot'),
+            robotList = FraunhoferIAIS.Blockly.getRobotListForFrontend();
+        
+        robotList.forEach(function(robot) {
+            var option = document.createElement('option');
+            option.value = robot.value;
+            option.textContent = robot.textContent;
+            if (robot.value === Tutorial.tutorial.robot) {
+                option.selected = true;
+            }
+            robotSelection.appendChild(option);
         });
-    });
-    
-    CKEDITOR.replaceAll('rich-text-edit');
-    
-    FraunhoferIAIS.Input.initSpecificInputs(
-            FraunhoferIAIS.Tutorial, 
-            document.querySelectorAll('input[name^="tutorial."], select[name^="tutorial."], textarea[name^="tutorial."]'));
-}
+        
+        FraunhoferIAIS.Input.addHandleInputChangeCallback('tutorial.robot', function(oldRobot, newRobot) {
+            FraunhoferIAIS.Blockly.replaceRobot(newRobot);
+        });
+        
+        FraunhoferIAIS.Input.addHandleInputChangeCallback('tutorial.language', function(oldLanguage, newLanguage) {
+            FraunhoferIAIS.Blockly.replaceLanguage(newLanguage)
+                .then(Tutorial.refreshProgramSVGs());
+        });
+        
+        CKEDITOR.on('instanceCreated', function(event) {
+            event.editor.on('change', function () {
+                var textarea = document.getElementById(event.editor.name),
+                    changeEvent = new Event('change');
+                textarea.value = event.editor.getData();
+                textarea.dispatchEvent(changeEvent);
+            });
+        });
+        
+        CKEDITOR.replaceAll('rich-text-edit');
+        
+        FraunhoferIAIS.Input.initSpecificInputs(
+                Tutorial, 
+                document.querySelectorAll('input[name^="tutorial."], select[name^="tutorial."], textarea[name^="tutorial."]'));
+    }
+
+    return Tutorial;
+}(FraunhoferIAIS.Tutorial || {});
+
+//Above is refactored code. The code below
 
 FraunhoferIAIS.Tutorial.refreshProgramSVGs = function () {
     var currentStepIndex = FraunhoferIAIS.Tutorial.getCurrentStepIndex(),
@@ -256,8 +266,11 @@ FraunhoferIAIS.Tutorial.addQuizQuestionToForm = function(questionData, questionI
     
     document.getElementById('step-quiz').insertBefore(questionContainer, document.getElementById('step-quiz-add-question'));
 }
-
 FraunhoferIAIS.Tutorial.addQuizAnswer = function(container, questionObjectPath, answer, answerIndex) {
+    if (!container || questionObjectPath == '' || answerIndex < 0) {
+        return;
+    }
+    
     var answerContainer = FraunhoferIAIS.Template.getTemplate('step-quiz-answer'),
         answerLabel = answerContainer.querySelector('.step-quiz-answer-label'),
         answerInput = answerContainer.querySelector('.step-quiz-answer-input'),
@@ -285,7 +298,7 @@ FraunhoferIAIS.Tutorial.addQuizAnswer = function(container, questionObjectPath, 
         
         var question = FraunhoferIAIS.Input.traversePathToNodeParent((questionObjectPath + '.ignore').split('.'), FraunhoferIAIS.Tutorial);
         
-        if (!question || !question.answer || question.answer.length <= answerIndex || answerIndex < 0) {
+        if (!question || !question.answer || question.answer.length <= answerIndex) {
             return;
         }
         
