@@ -2,28 +2,32 @@ var FraunhoferIAIS = FraunhoferIAIS || {};
 
 FraunhoferIAIS.Toolbox = FraunhoferIAIS.Toolbox || {};
 
+FraunhoferIAIS.Toolbox.toolBoxCache = FraunhoferIAIS.Toolbox.toolBoxCache || {};
+
 FraunhoferIAIS.Toolbox.getUsedBlocksSubsetFromCurrentToolbox = function() {
     if (!FraunhoferIAIS.Toolbox.areRequirementsMet()){
         return;
     }
     
-    var currentToolBoxDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].program.toolbox.expert),
+    var currentToolBoxDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.getCurrentProgramToolbox('expert')),
         usedToolBoxBlockTypes,
         toolBoxBlocks,
         blockParent,
         innerCategories,
         categories;
     
-    usedToolBoxBlockTypes = FraunhoferIAIS.Toolbox.getUsedBlocksFromCurrentProgram(); 
+    usedToolBoxBlockTypes = FraunhoferIAIS.Toolbox.getUsedBlocksFromCurrentProgram(false); 
     
     toolBoxBlocks = currentToolBoxDom.querySelectorAll('block[type]');
     
     for (var i = 0; i < toolBoxBlocks.length; i++) {
         if (usedToolBoxBlockTypes.indexOf(toolBoxBlocks[i].attributes.type.value) === -1) {
             blockParent = toolBoxBlocks[i].parentNode;
-            blockParent.removeChild(toolBoxBlocks[i]);
-            if (blockParent.children.length === 0) {
-                blockParent.parentNode.removeChild(blockParent);
+            if (blockParent.tagName.toLowerCase() === 'category') {
+                blockParent.removeChild(toolBoxBlocks[i]);
+                if (blockParent.children.length === 0) {
+                    blockParent.parentNode.removeChild(blockParent);
+                }
             }
         }
     }
@@ -109,16 +113,15 @@ FraunhoferIAIS.Toolbox.getCurrentToolboxWithDeactivatedBlocks = function() {
     return Blockly.Xml.domToText(currentToolBoxDom);
 }
 
-FraunhoferIAIS.Toolbox.getUsedBlocksFromCurrentProgram = function() {
+FraunhoferIAIS.Toolbox.getUsedBlocksFromCurrentProgram = function(includeImplicitBlocks = true) {
     if (!FraunhoferIAIS.Toolbox.areRequirementsMet()){
         return;
     }
     
     var currentProgramDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.currentProgram),
         defaultProgramDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].program.prog),
-        currentToolBoxDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].program.toolbox.expert),
-        usedBlockTypes = FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram(currentProgramDom),
-        defaultBlockTypes = FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram(defaultProgramDom);
+        usedBlockTypes = FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram(currentProgramDom, includeImplicitBlocks),
+        defaultBlockTypes = FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram(defaultProgramDom, includeImplicitBlocks);
     
     return usedBlockTypes.filter(function(usedBlockType) {
         return defaultBlockTypes.indexOf(usedBlockType) === -1;
@@ -150,12 +153,43 @@ FraunhoferIAIS.Toolbox.areRequirementsMet = function() {
     return true;
 }
 
-FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram = function(rootElement) {
+FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram = function(rootElement, includeImplizitBlocks = true) {
     var blocks = [].slice.call(rootElement.querySelectorAll('block[type]')),
         blockTypes = [];
     
+    if (!includeImplizitBlocks) {
+        var blockRelationObject = FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot();
+        
+        blocks = blocks.filter(function (block) {
+            var depth = 0,
+                currentRelationNode = blockRelationObject.relations,
+                currentNode = block;
+            
+            if (!currentRelationNode[block.getAttribute('type')]) {
+                return true;
+            }
+            
+            while (depth <= blockRelationObject.maxDepth && currentNode !== null && currentNode.nodeName !== '#document') {
+                if (currentNode.tagName.toLowerCase() === 'block' && currentNode.getAttribute('type')) {
+                    currentRelationNode = currentRelationNode[currentNode.getAttribute('type')] || null;
+                    
+                    if (currentRelationNode === null) {
+                        return true;
+                    } else if (Object.keys(currentRelationNode).length === 0) {
+                        return false;
+                    }
+                    
+                    depth += 1;
+                }
+                currentNode = currentNode.parentNode;
+            }
+            
+            return true;
+        });
+    }
+    
     //Check if the root itself is a block
-    if (rootElement.tagName.toUpperCase() === 'block' && rootElement.getAttribute('type')) {
+    if (rootElement.tagName.toLowerCase() === 'block' && rootElement.getAttribute('type')) {
         blocks.push(rootElement);
     }
     
@@ -166,4 +200,65 @@ FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram = function(rootElement) {
     return blockTypes.filter(function(blockType, index, blockTypes) {
             return blockTypes.indexOf(blockType) === index;
         });
+}
+
+FraunhoferIAIS.Toolbox.blockRelationCache = FraunhoferIAIS.Toolbox.blockRelationCache || [];
+
+FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot = function () {
+    if (!FraunhoferIAIS.Blockly.currentRobot) {
+        return;
+    }
+    
+    if (FraunhoferIAIS.Toolbox.blockRelationCache[FraunhoferIAIS.Blockly.currentRobot]) {
+        return FraunhoferIAIS.Toolbox.blockRelationCache[FraunhoferIAIS.Blockly.currentRobot];
+    }
+    
+    var currentToolboxDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.getCurrentProgramToolbox('expert')),
+        blocks = [].slice.call(currentToolboxDom.querySelectorAll('block[type]')),
+        blockRelations = {},
+        currentNode = null,
+        currentPathElement = null,
+        blockType = '',
+        currentDepth = 0,
+        maxDepth = 0;
+    
+    blocks.forEach(function (block) {
+        currentNode = block;
+        currentPathElement = blockRelations;
+        blockType = '';
+        currentDepth = 0;
+        
+        while (currentNode !== null && currentNode.nodeName !== '#document') {
+            if (currentNode.tagName.toLowerCase() === 'block' && currentNode.getAttribute('type')) {
+                blockType = currentNode.getAttribute('type');
+                if (!currentPathElement[blockType]) {
+                    currentPathElement[blockType] = {};
+                }
+                currentPathElement = currentPathElement[blockType];
+                currentDepth += 1;
+            }
+            currentNode = currentNode.parentNode || null;
+        }
+        
+        if (currentDepth > maxDepth) {
+            maxDepth = currentDepth;
+        }
+    });
+    
+    blockRelations = 
+        Object.keys(blockRelations)
+            .filter(function(relation) {
+                return Object.keys(blockRelations[relation]).length > 0;
+            })
+            .reduce(function(obj, key) {
+               obj[key] = blockRelations[key];
+               return obj;
+            }, {});
+    
+    FraunhoferIAIS.Toolbox.blockRelationCache[FraunhoferIAIS.Blockly.currentRobot] = {
+            relations: blockRelations,
+            maxDepth: maxDepth
+    }
+    
+    return FraunhoferIAIS.Toolbox.blockRelationCache[FraunhoferIAIS.Blockly.currentRobot];
 }

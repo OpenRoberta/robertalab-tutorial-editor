@@ -93,9 +93,9 @@ FraunhoferIAIS.Tutorial = function (Tutorial) { //Tutorial = FraunhoferIAIS.Tuto
     }
 
     return Tutorial;
-}(FraunhoferIAIS.Tutorial || {});
+} (FraunhoferIAIS.Tutorial || {});
 
-//Above is refactored code. The code below
+//Above is refactored code.
 
 FraunhoferIAIS.Tutorial.refreshProgramSVGs = function () {
     var currentStepIndex = FraunhoferIAIS.Tutorial.getCurrentStepIndex(),
@@ -147,10 +147,10 @@ FraunhoferIAIS.Tutorial.persistCurrentProgramInStep = function(step) {
     }
     
     if (!step.toolbox) {
-        step.toolbox = FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].program.toolbox.beginner;
+        step.toolbox = FraunhoferIAIS.Blockly.getCurrentProgramToolbox('beginner');
     } else if (step.toolbox === true 
-                || step.toolbox != FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].program.toolbox.beginner
-                    && step.toolbox != FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].program.toolbox.expert) {
+                || step.toolbox != FraunhoferIAIS.Blockly.getCurrentProgramToolbox('beginner')
+                    && step.toolbox != FraunhoferIAIS.Blockly.getCurrentProgramToolbox('beginner')) {
         step.toolbox = FraunhoferIAIS.Toolbox.getUsedBlocksSubsetFromCurrentToolbox();
     }
     
