@@ -368,6 +368,30 @@ FraunhoferIAIS.Blockly.replaceRobot = function(robotName, strict) {
         });
 }
 
+FraunhoferIAIS.Blockly.getCurrentProgramToolbox = function (toolBoxIdentifier = '') {
+    if (!FraunhoferIAIS.Blockly.currentRobot 
+        || !FraunhoferIAIS.Blockly.robotCache 
+        || !FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot]) {
+        return null;
+    }
+    
+    //Set expert as default
+    if (toolBoxIdentifier !== 'beginner') {
+        toolBoxIdentifier = 'expert';
+    }
+    
+    return FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].program.toolbox[toolBoxIdentifier];
+}
+
+FraunhoferIAIS.Blockly.getCurrentConfigurationToolbox = function () {
+    if (!FraunhoferIAIS.Blockly.currentRobot 
+        || !FraunhoferIAIS.Blockly.robotCache 
+        || !FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot]) {
+        return null;
+    }
+    return FraunhoferIAIS.Blockly.robotCache[FraunhoferIAIS.Blockly.currentRobot].configuration.toolbox;
+}
+
 FraunhoferIAIS.Blockly.languageCache = FraunhoferIAIS.Blockly.languageCache || {};
 
 FraunhoferIAIS.Blockly.currentLanguage = FraunhoferIAIS.Blockly.currentLanguage || {};
