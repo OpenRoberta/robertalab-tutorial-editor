@@ -538,7 +538,8 @@ FraunhoferIAIS.Tutorial.loadStep = function(stepIndex) {
     }
     
     if (stepIndex === FraunhoferIAIS.Tutorial.getCurrentStepIndex()) {
-        return;
+        FraunhoferIAIS.Loading.stopIndicator();
+        return persistPromise;
     }
     
     if (FraunhoferIAIS.Tutorial.currentStep !== null) {
