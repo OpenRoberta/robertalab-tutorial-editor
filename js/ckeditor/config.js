@@ -35,5 +35,7 @@ CKEDITOR.editorConfig = function( config ) {
     config.uiColor = '#EEEEEE';
     config.height = 320;
     
+    config.allowedContent = true;
+    
     config.readOnly = false;
 };
