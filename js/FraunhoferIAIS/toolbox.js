@@ -11,17 +11,26 @@ FraunhoferIAIS.Toolbox.getUsedBlocksSubsetFromCurrentToolbox = function() {
     
     var currentToolBoxDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.getCurrentProgramToolbox('expert')),
         usedToolBoxBlockTypes,
+        usedToolBoxDuplicatesRelationPaths,
         toolBoxBlocks,
+        blockType,
         blockParent,
         innerCategories,
         categories;
     
     usedToolBoxBlockTypes = FraunhoferIAIS.Toolbox.getUsedBlocksFromCurrentProgram(false); 
+    usedDuplicateRelationPaths = FraunhoferIAIS.Toolbox.getDuplicateRelationPaths(usedToolBoxBlockTypes);
+    
+    //TODO: implement its usage in the while loop below
     
     toolBoxBlocks = currentToolBoxDom.querySelectorAll('block[type]');
     
     for (var i = 0; i < toolBoxBlocks.length; i++) {
-        if (usedToolBoxBlockTypes.indexOf(toolBoxBlocks[i].attributes.type.value) === -1) {
+        blockType = toolBoxBlocks[i].getAttribute('type');
+        if (usedToolBoxBlockTypes.indexOf(blockType) === -1
+                || usedDuplicateRelationPaths[blockType] && !usedDuplicateRelationPaths[blockType].reduce(function (found, relation) {
+                    return found || FraunhoferIAIS.Toolbox.traverseTopDown(toolBoxBlocks[i], {[blockType]: relation});
+                }, false)) {
             blockParent = toolBoxBlocks[i].parentNode;
             if (blockParent.tagName.toLowerCase() === 'category') {
                 blockParent.removeChild(toolBoxBlocks[i]);
@@ -128,6 +137,56 @@ FraunhoferIAIS.Toolbox.getUsedBlocksFromCurrentProgram = function(includeImplici
     });
 }
 
+FraunhoferIAIS.Toolbox.getDuplicateRelationPaths = function (blockTypes) {
+    var topDownRelations = FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot().topDownRelations,
+        blockMatches = {},
+        currentProgram = null,
+        blocks,
+        matchingRelations,
+        distinctMatches = [];
+    
+    for (var blockType in topDownRelations) {
+        if (blockTypes.indexOf(blockType) !== -1) {
+            if (currentProgram === null) {
+                currentProgram = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.currentProgram);
+            }
+            
+            blocks = [].slice.call(currentProgram.querySelectorAll('block[type="' + blockType + '"]'));
+            
+            matchingRelations = blocks.map(function(block) {
+                return FraunhoferIAIS.Toolbox.getMatchingTopDownRelations(block);
+            });
+            
+            
+            for (var i = 0; i < matchingRelations.length; i++) {
+                if (matchingRelations[i].length === 0) {
+                    distinctMatches = topDownRelations[blockType];
+                    break;
+                } else {
+                    matchingRelations[i].forEach(function (relation) {
+                        
+                        if (distinctMatches.length === topDownRelations[blockType].length) {
+                            return;
+                        }
+                        
+                        if (!distinctMatches.reduce(function(found, distinctRelation) {
+                            
+                            return found || FraunhoferIAIS.Toolbox.compareTopDownRelations(relation, discintRelation);
+                            
+                        }, false)) {
+                            distinctMatches.push(relation);
+                        }
+                    });
+                }
+            }
+            
+            blockMatches[blockType] = distinctMatches;
+        }
+    }
+    
+    return blockMatches;
+}
+
 FraunhoferIAIS.Toolbox.areRequirementsMet = function() {
     if (!Blockly 
             || !FraunhoferIAIS.Blockly 
@@ -158,34 +217,7 @@ FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram = function(rootElement, i
         blockTypes = [];
     
     if (!includeImplizitBlocks) {
-        var blockRelationObject = FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot();
-        
-        blocks = blocks.filter(function (block) {
-            var depth = 0,
-                currentRelationNode = blockRelationObject.relations,
-                currentNode = block;
-            
-            if (!currentRelationNode[block.getAttribute('type')]) {
-                return true;
-            }
-            
-            while (depth <= blockRelationObject.maxDepth && currentNode !== null && currentNode.nodeName !== '#document') {
-                if (currentNode.tagName.toLowerCase() === 'block' && currentNode.getAttribute('type')) {
-                    currentRelationNode = currentRelationNode[currentNode.getAttribute('type')] || null;
-                    
-                    if (currentRelationNode === null) {
-                        return true;
-                    } else if (Object.keys(currentRelationNode).length === 0) {
-                        return false;
-                    }
-                    
-                    depth += 1;
-                }
-                currentNode = currentNode.parentNode;
-            }
-            
-            return true;
-        });
+        blocks = blocks.filter(FraunhoferIAIS.Toolbox.hasFullBottomUpRelation);
     }
     
     //Check if the root itself is a block
@@ -193,9 +225,9 @@ FraunhoferIAIS.Toolbox.getDistinctBlockTypesForProgram = function(rootElement, i
         blocks.push(rootElement);
     }
     
-    for (var i = 0; i < blocks.length; i++) {
-        blockTypes.push(blocks[i].attributes.type.value);
-    }
+    blockTypes = blocks.map(function(block) {
+        return block.getAttribute('type');
+    });
     
     return blockTypes.filter(function(blockType, index, blockTypes) {
             return blockTypes.indexOf(blockType) === index;
@@ -214,17 +246,22 @@ FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot = function () {
     }
     
     var currentToolboxDom = Blockly.Xml.textToDom(FraunhoferIAIS.Blockly.getCurrentProgramToolbox('expert')),
-        blocks = [].slice.call(currentToolboxDom.querySelectorAll('block[type]')),
-        blockRelations = {},
+        blocks,
+        bottomUpRelations = {},
+        topDownRelations = [],
         currentNode = null,
         currentPathElement = null,
         blockType = '',
         currentDepth = 0,
+        leafs,
         maxDepth = 0;
+    
+    //Create Bottom Up relations
+    blocks = [].slice.call(currentToolboxDom.querySelectorAll('block[type]'));
     
     blocks.forEach(function (block) {
         currentNode = block;
-        currentPathElement = blockRelations;
+        currentPathElement = bottomUpRelations;
         blockType = '';
         currentDepth = 0;
         
@@ -245,20 +282,193 @@ FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot = function () {
         }
     });
     
-    blockRelations = 
-        Object.keys(blockRelations)
-            .filter(function(relation) {
-                return Object.keys(blockRelations[relation]).length > 0;
-            })
-            .reduce(function(obj, key) {
-               obj[key] = blockRelations[key];
-               return obj;
-            }, {});
+    for (var relation in bottomUpRelations) {
+        if (Object.keys(bottomUpRelations[relation]).length === 0) {
+            delete bottomUpRelations[relation];
+        }
+    }
+    
+    //Create Top Down relations
+    
+    //Get all root blocks, but remove all blocks that do not have any children
+    blocks = [].slice.call(currentToolboxDom.querySelectorAll('category > block[type]')).filter(function(block) {
+        return block.querySelectorAll('block[type]').length > 0;
+    });
+    
+    blocks.forEach(function(block) {
+        topDownRelations.push(FraunhoferIAIS.Toolbox.buildTopDownRelation(block));
+    });
+    
+    topDownRelations = topDownRelations.reduce(function(carry, relationObject) {
+        if (!carry[relationObject.type]) {
+            carry[relationObject.type] = [];
+        }
+        
+        carry[relationObject.type].push(relationObject.nodeRelations);
+        return carry;
+    }, {});
+    
+    for (var topDownType in topDownRelations) {
+        if (topDownRelations[topDownType].length < 2) {
+            delete topDownRelations[topDownType];
+        }
+    }
     
     FraunhoferIAIS.Toolbox.blockRelationCache[FraunhoferIAIS.Blockly.currentRobot] = {
-            relations: blockRelations,
+            bottomUpRelations: bottomUpRelations,
+            topDownRelations: topDownRelations,
             maxDepth: maxDepth
     }
     
     return FraunhoferIAIS.Toolbox.blockRelationCache[FraunhoferIAIS.Blockly.currentRobot];
+}
+
+FraunhoferIAIS.Toolbox.buildTopDownRelation = function(block) {
+    var leafRelations = [].slice.call(block.querySelectorAll('block[type]'))
+        .filter(function(block) {
+            //This filters out the block itself, too
+            return block.querySelectorAll('block[type]').length === 0;
+        }).map(function(leaf) {
+            var currentNode = leaf,
+                trackedRelations = {},
+                blockType;
+            while (currentNode !== block) {
+                if (currentNode.tagName.toLowerCase() === 'block') {
+                    blockType = currentNode.getAttribute('type');
+                    if (blockType) {
+                        trackedRelations = {[blockType]: trackedRelations};
+                    }
+                }
+                currentNode = currentNode.parentNode;
+            }
+            return trackedRelations;
+        }).reduce(function (carry, leafRelationObject) {
+            var currentNode = carry,
+                currentRelationNode = leafRelationObject,
+                blockType;
+            while (currentRelationNode !== null) {
+                blockType = Object.keys(currentRelationNode)[0];
+                if (!currentNode[blockType]) {
+                    currentNode[blockType] = currentRelationNode[blockType];
+                    break;
+                }
+                currentNode = currentNode[blockType];
+                currentRelationNode = currentRelationNode[blockType];
+            }
+            return carry;
+        }, {});
+    
+    return {
+            type: block.getAttribute('type'),
+            nodeRelations: leafRelations
+    };
+}
+
+FraunhoferIAIS.Toolbox.hasFullBottomUpRelation = function (block) {
+    var blockRelationObject = FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot(),
+        depth = 0,
+        currentRelationNode = blockRelationObject.bottomUpRelations,
+        currentNode = block;
+    
+    if (!currentRelationNode[block.getAttribute('type')]) {
+        return true;
+    }
+    
+    while (depth <= blockRelationObject.maxDepth && currentNode !== null && currentNode.nodeName !== '#document') {
+        if (currentNode.tagName.toLowerCase() === 'block' && currentNode.getAttribute('type')) {
+            currentRelationNode = currentRelationNode[currentNode.getAttribute('type')] || null;
+            
+            if (currentRelationNode === null) {
+                return true;
+            } else if (Object.keys(currentRelationNode).length === 0) {
+                return false;
+            }
+            
+            depth += 1;
+        }
+        currentNode = currentNode.parentNode;
+    }
+    
+    return true;
+}
+
+FraunhoferIAIS.Toolbox.getMatchingTopDownRelations = function (block) {
+    var blockRelationObject = FraunhoferIAIS.Toolbox.getBlockRelationObjectForCurrentRobot(),
+        topDownRelations = blockRelationObject.topDownRelations,
+        blockType = block.getAttribute('type'),
+        childNodes = [],
+        onTrack = true,
+        matched = false;
+    
+    if (!blockType || !topDownRelations[blockType]) {
+        return null;
+    }
+    
+    return topDownRelations[blockType].filter(function (topDownRelation) {
+        return FraunhoferIAIS.Toolbox.traverseTopDown(block, {[blockType]: topDownRelation});
+    });
+}
+
+FraunhoferIAIS.Toolbox.traverseTopDown = function (root, nextRelations) {
+    if (!nextRelations || !root) {
+        return false;
+    }
+    
+    if (Object.keys(nextRelations).length === 0) {
+        return true;
+    }
+    
+    var childNodes = [root],
+        onTrack = null,
+        leftPossibilities = Object.keys(nextRelations).length,
+        maxBlockDepth = 4;
+    
+    //breadth search through the child elements
+    while (childNodes.length > 0 && leftPossibilities > 0 && maxBlockDepth > 0) {
+        childNodes = childNodes.reduce(function (newChildNodes, childNode) {
+            if (onTrack === false) {
+                return [];
+            }
+            
+            var childNodeType = childNode.getAttribute('type');
+            
+            if (childNodeType && childNode.tagName && childNode.tagName.toLowerCase() === 'block') {
+                if (!nextRelations[childNodeType]) {
+                    onTrack = false;
+                    return [];
+                }
+                
+                onTrack = childNode.children.length === 0 && Object.keys(nextRelations[childNodeType]).length === 0 
+                            || childNode.children.length > 0 && [].slice.call(childNode.children).reduce(function(oneMatch, child) {
+                                return oneMatch || FraunhoferIAIS.Toolbox.traverseTopDown(child, nextRelations[childNodeType]);
+                            }, false);
+                
+                leftPossibilities -= 1;
+                
+                if (leftPossibilities <= 0 || !onTrack) {
+                    return [];
+                } else {
+                    return newChildNodes;
+                }
+            }
+            return newChildNodes.concat(childNode.children.length > 0  ? [].slice.call(childNode.children) : []);
+        }, []);
+        maxBlockDepth -= 1;
+    }
+    
+    return onTrack || false;
+}
+
+FraunhoferIAIS.Toolbox.compareTopDownRelations = function (a, b) {
+    if (Object.keys(a).length !== Object.keys(b).length) {
+        return false;
+    }
+    
+    for (var type in a) {
+        if (!b[type] || !FraunhoferIAIS.Toolbox.compareTopDownRelations(a[type], b[type])) {
+            return false;
+        }
+    }
+    
+    return true;
 }
