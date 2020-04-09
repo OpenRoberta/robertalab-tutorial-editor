@@ -503,9 +503,13 @@ FraunhoferIAIS.Tutorial.addStepNavigationButton = function(stepIndex) {
         stepButton = FraunhoferIAIS.Template.getTemplate('step-button'),
         currentIndex = FraunhoferIAIS.Tutorial.getCurrentStepIndex();
 
-    stepButton.textContent = stepIndex + 1;
+    stepButton.querySelector('span:first-child').textContent = stepIndex + 1;
     if (currentIndex === stepIndex) {
         stepButton.classList.add('active');
+    }
+    
+    if (FraunhoferIAIS.Tutorial.tutorial.step[stepIndex].quiz) {
+        stepButton.classList.add('quiz');
     }
     
     stepButton.addEventListener('click', function (evt) {
