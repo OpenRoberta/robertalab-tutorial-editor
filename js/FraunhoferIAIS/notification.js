@@ -58,7 +58,7 @@ FraunhoferIAIS.Notification.showNotification = function (type, headline, content
     });
     
     FraunhoferIAIS.Notification.notificationBar.appendChild(notification);
-    FraunhoferIAIS.Notification.removeNotification(notification, 10000);
+    FraunhoferIAIS.Notification.removeNotification(notification, 5000);
 }
 
 FraunhoferIAIS.Notification.removeNotification = function(notification, delay) {

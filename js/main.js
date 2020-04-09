@@ -588,7 +588,11 @@ FraunhoferIAIS.Tutorial.refreshSettings = function(filter) {
 }
 
 FraunhoferIAIS.Tutorial.initGlobalEvents = function() {
-    var downloadButton = document.getElementById('download');
+    var downloadButton = document.getElementById('download'),
+        uploadInput = document.getElementById('upload'),
+        initXMLUpload = document.getElementById('initXML-upload'),
+        initXMLDelete = document.getElementById('initXML-delete'),
+        initXMLInsert = document.getElementById('initXML-insert');
     
     downloadButton.addEventListener('click', function(clickEvent) {
         clickEvent.preventDefault();
@@ -611,7 +615,6 @@ FraunhoferIAIS.Tutorial.initGlobalEvents = function() {
         });
     });
     
-    var uploadInput = document.getElementById('upload');
     uploadInput.addEventListener('change', function(changeEvent) {
         changeEvent.preventDefault();
         if (this.files.length > 0) {
@@ -646,6 +649,7 @@ FraunhoferIAIS.Tutorial.initGlobalEvents = function() {
                         FraunhoferIAIS.Tutorial.loadStep(0).then(function() {
                             FraunhoferIAIS.Tutorial.refreshSettings('tutorial.');
                         });
+                        FraunhoferIAIS.Tutorial.showInitXMLButtons();
                     };
                 
                 FraunhoferIAIS.Modal.showConfirmationModal(modalHeadline, modalContent, modalSuccessHandler);
@@ -653,6 +657,128 @@ FraunhoferIAIS.Tutorial.initGlobalEvents = function() {
             fileReader.readAsText(file);
         }
     });
+    
+    initXMLUpload.addEventListener('change', function(changeEvent) {
+        changeEvent.preventDefault();
+        FraunhoferIAIS.Loading.startIndicator();
+        
+        var context = this;
+        
+        (new Promise(function(resolve, reject) {
+            if (context.files.length = 0) {
+                reject(new Error('Konnte keine ausgewählte Datei finden.'))
+                return;
+            }
+            
+            var file = context.files[0];
+            
+            if (file.type.match(/(?:^|\/)?xml(?:$|\/)?/) === null) {
+                reject(new Error('Falsches Dateiformat. Es wird ein XML Export des Labs erwartet.'))
+                return;
+            }
+            
+            var fileReader = new FileReader();
+            fileReader.onload = function(loadEvent) {
+                if (loadEvent.target.result.trim() === '') {
+                    reject(new Error('Die ausgewählte Datei ist leer.'));
+                    return;
+                }
+                
+                FraunhoferIAIS.Blockly.checkLabExport(loadEvent.target.result, false).then(function() {
+                    FraunhoferIAIS.Tutorial.tutorial.initXML = loadEvent.target.result;
+                    resolve();
+                }).catch(function(error){
+                    reject(error);
+                })
+            }
+            fileReader.readAsText(file);
+            setTimeout(function() {
+                reject(new Error('Die Datei konnte nicht geladen werden.'));
+            }, 5000);
+            
+        })).then(function() {
+            FraunhoferIAIS.Tutorial.showInitXMLButtons();
+        }).catch(function(error) {
+            if (error && error.message) {
+                FraunhoferIAIS.Notification.showNotification('warning', 'Fehler beim Laden des initialen Programms:', error.message);
+            }
+        }).then(function() {
+            FraunhoferIAIS.Loading.stopIndicator();
+        });
+    });
+    
+    initXMLDelete.addEventListener('click', function(clickEvent) {
+        clickEvent.preventDefault();
+        delete(FraunhoferIAIS.Tutorial.tutorial.initXML);
+
+        FraunhoferIAIS.Tutorial.showInitXMLButtons();
+        
+        checkInitialXMLToFormField(null, null);
+    });
+    
+    initXMLInsert.addEventListener('click', function (changeEvent) {
+        changeEvent.preventDefault();
+        
+        FraunhoferIAIS.Loading.startIndicator();
+        
+        (new Promise(function(resolve, reject) {
+            if (!FraunhoferIAIS.Tutorial.tutorial.initXML) {
+                reject(new Error('Es ist kein initiales Programm vorhanden.'));
+                return;
+            }
+            
+            var doubleOptPromise = Promise.resolve();
+            
+            if (FraunhoferIAIS.Blockly.programWorkspace !== null) {
+                doubleOptPromise = new Promise(function(doubleOptResolve, doubleOptReject) {
+                    FraunhoferIAIS.Modal.showConfirmationModal(
+                        'Initiales Programm laden', 
+                        'Wenn Sie das initiale Programm in den aktuellen Schritt laden, wird das bisherige Programm in diesem Schritt verworfen.', 
+                        doubleOptResolve, 
+                        doubleOptReject
+                    );
+                });
+            }
+            
+            doubleOptPromise.then(function() {
+                resolve(FraunhoferIAIS.Tutorial.tutorial.initXML);
+            }).catch(function() {
+                reject();
+            });
+            
+        })).then(function(labExport) {
+            return FraunhoferIAIS.Blockly.importFromLab(labExport, !FraunhoferIAIS.Blockly.programWorkspace).then(function() {
+                return FraunhoferIAIS.Tutorial.persistCurrentProgramInStep();
+            });
+        }).catch(function(error) {
+            if (error && error.message) {
+                FraunhoferIAIS.Notification.showNotification('warning', 'Fehler beim Laden des initialen Programms:', error.message);
+            }
+        }).then(function() {
+            FraunhoferIAIS.Loading.stopIndicator();
+        });
+    });
+
+    FraunhoferIAIS.Tutorial.showInitXMLButtons();
+}
+
+FraunhoferIAIS.Tutorial.showInitXMLButtons = function () {
+    var initXMLNew = document.getElementById('initXML-new'),
+        initXMLEdit = document.getElementById('initXML-edit'),
+        initXMLDelete = document.getElementById('initXML-delete'),
+        initXMLInsert = document.getElementById('initXML-insert');
+    
+    if (FraunhoferIAIS.Tutorial.tutorial.initXML) {
+        initXMLNew.style.display = 'none';
+        initXMLEdit.style.display = '';
+        initXMLDelete.style.display = '';
+        initXMLInsert.style.display = '';
+    } else {
+        initXMLNew.style.display = '';
+        initXMLEdit.style.display = 'none';
+        initXMLDelete.style.display = 'none';
+        initXMLInsert.style.display = 'none';
+    }
 }
 
 
@@ -856,4 +982,13 @@ FraunhoferIAIS.Tutorial.addStepNumberToHeader = function (step, addStepNumber, o
 
 FraunhoferIAIS.Tutorial.addStepNumberToHeaderToFormField = function (step, formField) {
     formField.checked = step.header.match(/^Schritt \d+\: .+/);
+}
+
+FraunhoferIAIS.Tutorial.checkInitialXML = function (step, labExport, objectPath) {
+    //TODO: Check is initialXML is actually a Lab Export
+    debugger;
+}
+
+FraunhoferIAIS.Tutorial.checkInitialXMLToFormField = function (step, formField) {
+    debugger;
 }

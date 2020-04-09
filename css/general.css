@@ -111,7 +111,8 @@ textarea.large {
 	height: 30em;
 }
 
-button {
+button,
+.iais-button {
 	box-sizing: border-box;
 	display: inline-block;
 	padding: .5em;
@@ -126,7 +127,9 @@ button {
 }
 
 button:hover,
-button.iais-active {
+button.iais-active, 
+.iais-button:hover,
+.iais-button.iais-active {
 	background-color: #C7D92B;
 }
 
@@ -184,7 +187,7 @@ button.button-deactivated {
 }
 
 input[type="file"]:not(.show) {
-	display: none;
+	display: none !important;
 }
 
 .divider {
@@ -220,6 +223,10 @@ input[type="file"]:not(.show) {
 	z-index: 9999;
 	background-color: rgba(0, 0, 0, .25);
 	padding: 2rem;
+}
+
+.iais-modal:not([style]) {
+	display: none;
 }
 
 .iais-modal > section {
@@ -367,7 +374,7 @@ input[type="file"]:not(.show) {
 }
 
 .double-opt-popup > article {
-	diplay: block;
+	display: block;
 	margin: 1em auto;
 	width: 30em;
 	padding: 1em;

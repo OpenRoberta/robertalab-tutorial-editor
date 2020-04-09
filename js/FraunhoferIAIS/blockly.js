@@ -563,6 +563,52 @@ FraunhoferIAIS.Blockly.saveConfigurationAsCurrent = function() {
     }
 }
 
+FraunhoferIAIS.Blockly.checkLabExport = function (labExportFileContent, allowRobotChange) {
+    var xmlParser = new DOMParser(),
+        importedXml = xmlParser.parseFromString(labExportFileContent, 'text/xml'),
+        robot,
+        program,
+        configuration;
+    
+    //type safe check to set a default value
+    allowRobotChange = allowRobotChange === true;
+    
+    if (!importedXml || importedXml.documentElement.tagName.toLowerCase() === 'parsererror') {
+        return Promise.reject(new Error('Die angegebene XML-Datei enthält XML-Syntax-Fehler und kann daher nicht geladen werden.'));
+    }
+    
+    if (importedXml.documentElement.getAttribute('xmlns') !== 'http://de.fhg.iais.roberta.blockly') {
+        return Promise.reject(new Error('Die angegebene XML-Datei ist in einem unbekannten Format verfasst und kann daher nicht interpretiert werden.'));
+    }
+    
+    program = importedXml.documentElement.querySelector('export > program > block_set');
+    configuration = importedXml.documentElement.querySelector('export > config > block_set');
+    
+    if (!program || !configuration) {
+        return Promise.reject(new Error('Das Programm konnte aus der angegebenen XML-Datei nicht ausgelesen werden.'));
+    }
+    
+    if (program.getAttribute('robottype') !== configuration.getAttribute('robottype')) {
+        return Promise.reject(new Error('Die XML-Datei enthält semantische Fehler und wurde daher nicht geladen.'));
+    }
+    
+    robot = FraunhoferIAIS.Blockly.getDefaultRobotOfGroup(program.getAttribute('robottype'));
+    
+    if (!robot) {
+        return Promise.reject(new Error('Das in der Datei angegebene Robotersystem wurde nicht erkannt. Das Programm kann daher nicht geladen werden.'));
+    }
+    
+    if (!allowRobotChange) {
+        var currentRobotGroup = FraunhoferIAIS.Blockly.getRobotGroupName(FraunhoferIAIS.Blockly.currentRobot);
+        if (currentRobotGroup !== program.getAttribute('robottype')) {
+            return Promise.reject(new Error('Das in der Datei enthaltene Proramm wurde für ein anderes Robotersystem erstellt und wurde daher nicht geladen.'));
+        }
+        robot = FraunhoferIAIS.Blockly.currentRobot;
+    }
+    
+    return Promise.resolve();
+}
+
 FraunhoferIAIS.Blockly.importFromLab = function (labExportFileContent, changeRobot) {
     var xmlParser = new DOMParser(),
         importedXml = xmlParser.parseFromString(labExportFileContent, 'text/xml'),

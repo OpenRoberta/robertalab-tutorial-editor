@@ -38,7 +38,7 @@
 				<input id="tutorial-name" type="text" name="tutorial.name" placeholder="Unter diesem Namen werden alle Benutzer dein Tutorial sehen" pattern=".{1,35}" title="Der Name sollte nicht länger als 35 Zeichen sein."/>
 			</div>
 			<div class="form-row horizontal small-input">
-				<label for="tutorial-robot">Roboter:</label>
+				<label for="tutorial-initXML">Roboter:</label>
 				<select id="tutorial-robot" name="tutorial.robot">
 				</select>
 			</div>
@@ -75,23 +75,55 @@
 			<section id="tutorial-text-menu" class="iais-modal">
 	        	<span class="iais-close icon icon-style-button icon-button-tutorial-green icon-close-circle icon-theme-light"></span>
 				<section>
-					<div class="form-row vertical">
-						<label for="tutorial-time">Dauer: </label>
-						<input id="tutorial-time" class="headline-input" type="text" name="tutorial.time" placeholder="XX Minuten/Stunden ..."/>
+					<div class="form-row horizontal">
+						<label for="tutorial-index">Sortierung: </label>
+						<input id="tutorial-index" class="headline-input" type="number" min="0" name="tutorial.index" placeholder="Eine Nummer, die die Sortierung angibt. Umso kleiner diese Zahl ist, umso weiter vorne wird das Tutorial angezeigt."/>
 					</div>
-					<div class="form-row vertical">
+					<div class="form-row horizontal">
+						<label for="tutorial-group">Gruppe: </label>
+						<input id="tutorial-group" class="headline-input" type="text" name="tutorial.group" placeholder="Der Name einer Gruppe, falls dieses Tutorial Teil einer Tutorial-Reihe ist."/>
+					</div>
+					<hr/>
+					<div class="form-row horizontal small-input">
+						<label for="tutorial-initXML">Initiales Programm:</label>
+						<span class="iais-button-row">
+							<label id="initXML-new" for="initXML-upload" class="iais-button">Hinzufügen</label>
+							<label id="initXML-edit" for="initXML-upload" class="iais-button">Austauschen</label>
+							<input id="initXML-upload" type="file" name="initXML" accept="application/xml"/>
+							<button id="initXML-delete">Entfernen</button>
+							<button id="initXML-insert">In den aktuellen Schritt laden</button>
+						</span>
+					</div>
+					<hr/>
+					<div class="form-row horizontal">
+						<label for="tutorial-time">Dauer: </label>
+						<input id="tutorial-time" class="headline-input" type="text" name="tutorial.time" placeholder="z.B.: XX Minuten ..."/>
+					</div>
+					<div class="form-row horizontal">
 						<label for="tutorial-age">Altersgruppe: </label>
 						<input id="tutorial-age" class="headline-input" type="text" name="tutorial.age" placeholder="X bis X Jahre"/>
 					</div>
 					<hr />
-					<div class="form-row vertical">
+					<div class="form-row horizontal">
+						<label for="tutorial-level">Schwierigkeitsgrad: </label>
+						<input id="tutorial-level" class="headline-input" type="text" name="tutorial.level" placeholder="z.B. 1/3, oder 3/5 (also 1 von 3 oder 3 von 5, geschrieben mit Schrägstrich dazwischen)" pattern="\d+\/[1-9]\d*"/>
+					</div>
+					<div class="form-row horizontal">
 						<label for="tutorial-overview-goal">Lernziel: </label>
 						<input id="tutorial-overview-goal" class="headline-input" type="text" name="tutorial.overview.goal" placeholder="Du lernst mit ... umzugehen."/>
 					</div>
-					<div class="form-row vertical">
+					<div class="form-row horizontal">
 						<label for="tutorial-overview-previous">Vorkenntnisse: </label>
-						<input id="tutorial-overview-previous" class="headline-input" type="text" name="tutorial.overview.previous" placeholder="Du solltest schon mal ... haben."/>
+						<input id="tutorial-overview-previous" class="headline-input" type="text" name="tutorial.overview.previous" placeholder="Du solltest ... schon kennen."/>
 					</div>
+					<div class="form-row horizontal">
+						<label for="tutorial-sim">Simulation: </label>
+						<select id="tutorial-sim" name="tutorial.sim">
+							<option value="0" selected="selected">Nein</option>
+							<option value="1">Ja</option>
+						</select>
+					</div>
+					<hr />
 					<div class="form-row vertical">
 						<label for="tutorial-overview-description">Einführungstext: </label>
 						<textarea id="tutorial-overview-description" class="mid rich-text-edit" name="tutorial.overview.description" placeholder="Dieser Text wird am Anfang in einem Popup angezeigt, sofern ein Text angegeben wird."></textarea>
@@ -109,7 +141,6 @@
 				<button id="inject-step-before" type="button" class="mini-button" title="Neuen Schritt hier einfügen">+</button>
 				<button id="inject-step-after" type="button" class="mini-button" title="Neuen Schritt hier einfügen">+</button>
 				<button id="remove-step-button" type="button" class="mini-button" title="Ausgewählten Schritt löschen"><span class="rotate">+</span></button>
-				<!-- button id="clear-program-button" type="button">Programm für diesen Schritt leeren</button -->
 			</div>
 		</section>
 		<label id="upload-label" 
@@ -135,10 +166,6 @@
 			<div class="form-row vertical">
 				<label for="step-headline">Schritt-Überschrift: </label>
 				<input id="step-headline" class="headline-input" type="text" name="tutorial.step.0.setHeader" placeholder="NEPO richtig kennenlernen"/>
-			</div>
-			<div class="form-row vertical">
-				<label for="step-tip">Hinweis: </label>
-				<textarea id="step-tip" class="small" name="tutorial.step.0.tip" placeholder="Ein Hinweis, der über den Instruktionen angezeigt wird."></textarea>
 			</div>
 			<div class="form-row horizontal">
 				<input id="step-add-number-to-header" type="checkbox" name="tutorial.step.0.addStepNumberToHeader" value="1"/>
@@ -178,6 +205,10 @@
 				<label for="step-instructions">Instruktionen: </label>
 				<textarea id="step-instructions" class="large rich-text-edit" name="tutorial.step.0.instruction" placeholder="Der Experten-Modus"></textarea>
 			</div>	
+			<div class="form-row vertical">
+				<label for="step-tip">Tipp: </label>
+				<textarea id="step-tip" class="small" name="tutorial.step.0.tip.0" placeholder="Ein Tipp, der unter den Instruktionen angezeigt wird und links ein kleines Icon bekommt."></textarea>
+			</div>
 		</section>
 		<section id="step-quiz">
 			<button id="step-quiz-add-question" type="button">Frage hinzufügen</button>

@@ -50,4 +50,6 @@ FraunhoferIAIS.Modal.showConfirmationModal = function (headline, content, succes
     modal.querySelector('section > header > *').textContent = headline;
     modal.querySelector('section > p').textContent = content;
     document.body.appendChild(modal);
+    modal.style.display = 'none';
+    modal.style.display = '';
 }

@@ -461,7 +461,7 @@ textarea.large {
 }
 
 .double-opt-popup > article {
-	diplay: block;
+	display: block;
 	margin: 1em auto;
 	width: 30em;
 	padding: 1em;
