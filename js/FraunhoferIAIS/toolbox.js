@@ -171,7 +171,7 @@ FraunhoferIAIS.Toolbox.getDuplicateRelationPaths = function (blockTypes) {
                         
                         if (!distinctMatches.reduce(function(found, distinctRelation) {
                             
-                            return found || FraunhoferIAIS.Toolbox.compareTopDownRelations(relation, discintRelation);
+                            return found || FraunhoferIAIS.Toolbox.compareTopDownRelations(relation, distinctRelation);
                             
                         }, false)) {
                             distinctMatches.push(relation);
