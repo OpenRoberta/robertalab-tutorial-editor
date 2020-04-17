@@ -203,12 +203,11 @@
 			</div>
 			<div class="form-row vertical">
 				<label for="step-instructions">Instruktionen: </label>
-				<textarea id="step-instructions" class="large rich-text-edit" name="tutorial.step.0.instruction" placeholder="Der Experten-Modus"></textarea>
-			</div>	
-			<div class="form-row vertical">
-				<label for="step-tip">Tipp: </label>
-				<textarea id="step-tip" class="small" name="tutorial.step.0.tip.0" placeholder="Ein Tipp, der unter den Instruktionen angezeigt wird und links ein kleines Icon bekommt."></textarea>
+				<textarea id="step-instructions" class="large rich-text-edit" name="tutorial.step.0.instruction" placeholder="Die eigentlichen Hinweise des aktuellen Schrittes."></textarea>
 			</div>
+			<hr/>
+			<h4 id="step-tip-headline">Hinweise</h4>
+			<button id="step-tip-add-button" type="button">Hinweis hinzufügen</button>
 		</section>
 		<section id="step-quiz">
 			<button id="step-quiz-add-question" type="button">Frage hinzufügen</button>
@@ -256,6 +255,13 @@
 			<div class="form-row horizontal">
 				<input class="step-quiz-answer-correct-input" id="" name="" value="1" type="checkbox">
 				<label class="step-quiz-answer-correct-label">Richtige Antwort</label>
+			</div>
+		</div>
+		<div id="step-tip" class="step-tip form-group">
+			<div class="form-row vertical">
+				<label class="step-tip-label">Hinweis:</label>
+				<textarea class="small" id="" name="" placeholder="Ein Hinweis, der unter den Instruktionen angezeigt wird und links ein kleines Icon bekommt."></textarea>
+				<button class="step-tip-remove-button" type="button">Diesen Hinweis löschen</button>
 			</div>
 		</div>
 	    <div id="modal-popup-message" class="iais-modal">

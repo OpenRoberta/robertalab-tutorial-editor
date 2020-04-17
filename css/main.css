@@ -380,6 +380,7 @@ textarea.large {
 }
 
 .step-quiz-remove-question-button,
+.step-tip-remove-button,
 .step-quiz-answer .iais-close {
 	background-color: #E2001A;
 }
@@ -389,8 +390,14 @@ textarea.large {
 }
 
 .step-quiz-remove-question-button:hover,
+.step-tip-remove-button:hover,
 .step-quiz-answer .iais-close:hover {
 	background-color: #FB001D;
+}
+
+.step-tip-remove-button,
+.step-tip-label {
+	margin: .5rem 0;
 }
 
 .icon-button.icon-size-big {

@@ -171,7 +171,8 @@ FraunhoferIAIS.Tutorial.calculateMaxBlocks = function() {
 }
 
 FraunhoferIAIS.Tutorial.initStepSettings = function () {
-    var addQuestionButton = document.getElementById('step-quiz-add-question');
+    var addQuestionButton = document.getElementById('step-quiz-add-question'),
+        addTipButton = document.getElementById('step-tip-add-button');
     addQuestionButton.addEventListener('click', function(evt) {
         evt.preventDefault();
         var newQuestion = JSON.parse(JSON.stringify(FraunhoferIAIS.Tutorial.defaults.question)),
@@ -184,6 +185,87 @@ FraunhoferIAIS.Tutorial.initStepSettings = function () {
         currentStep.quiz.push(newQuestion);
         FraunhoferIAIS.Tutorial.refreshQuizForm();
     });
+    addTipButton.addEventListener('click', function(evt) {
+        evt.preventDefault();
+        if (!FraunhoferIAIS.Tutorial.currentStep.tip) {
+            FraunhoferIAIS.Tutorial.currentStep.tip = [];
+        }
+        
+        FraunhoferIAIS.Tutorial.currentStep.tip.push('');
+        FraunhoferIAIS.Tutorial.refreshTips();
+    });
+}
+
+FraunhoferIAIS.Tutorial.refreshTips = function() {
+    var oldTips = [].slice.call(document.querySelectorAll('.step-tip')),
+        newTips = FraunhoferIAIS.Tutorial.currentStep.tip || [],
+        i = 0;
+    
+    for(i = 0; i < oldTips.length; i++) {
+        oldTips[i].parentNode.removeChild(oldTips[i]);
+    }
+    
+    if (newTips.length === 0) {
+        if (typeof FraunhoferIAIS.Tutorial.currentStep.tip !== 'undefined') {
+            delete FraunhoferIAIS.Tutorial.currentStep.tip; //Sanitize data structure
+        }
+        return;
+    }
+    
+    for(i = 0; i < newTips.length; i++) {
+        FraunhoferIAIS.Tutorial.addTipToForm(newTips[i], i);
+    }
+}
+FraunhoferIAIS.Tutorial.addTipToForm = function(tip, tipIndex) {
+    var addTipButton = document.getElementById('step-tip-add-button'),
+        stepIndex = FraunhoferIAIS.Tutorial.getCurrentStepIndex(),
+        tipContainer = FraunhoferIAIS.Template.getTemplate('step-tip'),
+        tipLabel = tipContainer.querySelector('label'),
+        tipInput = tipContainer.querySelector('textarea'),
+        removeTipButton = tipContainer.querySelector('button'),
+        tipObjectPath = 'tutorial.step.' + stepIndex + '.tip.' + tipIndex;
+
+    tipLabel.setAttribute('for', tipObjectPath);
+    tipLabel.textContent = (tipIndex + 1) + ". Hinweis";
+
+    tipInput.setAttribute('id', tipObjectPath);
+    tipInput.setAttribute('name', tipObjectPath);
+    tipInput.value = tip || '';
+    
+    removeTipButton.addEventListener('click', function(clickEvent) {
+        clickEvent.preventDefault();
+        
+        var step = FraunhoferIAIS.Tutorial.tutorial.step[stepIndex],
+            currentTipValue = step.tip && step.tip[tipIndex],
+            removeTipHandler = function() {
+                if (currentTipValue === false) {
+                    return;
+                }
+
+                if (step.tip.length > 1) {
+                    step.tip.splice(tipIndex, 1);
+                } else {
+                    delete step.tip;
+                }
+                FraunhoferIAIS.Tutorial.refreshTips();
+            };
+        
+        if (currentTipValue) {
+            var step = FraunhoferIAIS.Tutorial.tutorial.step[stepIndex],
+                modalHeadline = 'Möchten Sie den Hinweis tatsächlich löschen?',
+                modalContent = 'Der Hinweis wird unwiderruflich gelöscht.';
+                
+            FraunhoferIAIS.Modal.showConfirmationModal(modalHeadline, modalContent, removeTipHandler);
+        } else {
+            removeTipHandler();
+        }
+    });
+    
+    addTipButton.parentNode.insertBefore(tipContainer, addTipButton);
+
+    CKEDITOR.replace(tipInput);
+    
+    FraunhoferIAIS.Input.initSpecificInputs(FraunhoferIAIS.Tutorial, [tipInput]);
 }
 
 FraunhoferIAIS.Tutorial.refreshQuizForm = function() {
@@ -531,7 +613,8 @@ FraunhoferIAIS.Tutorial.addStep = function(stepData) {
 FraunhoferIAIS.Tutorial.loadStep = function(stepIndex) {
     FraunhoferIAIS.Loading.startIndicator();
     
-    var persistPromise = Promise.resolve();
+    var persistPromise = Promise.resolve(),
+        currentStepIndex = FraunhoferIAIS.Tutorial.getCurrentStepIndex();
     
     if (stepIndex >= FraunhoferIAIS.Tutorial.tutorial.step.length) {
         stepIndex = FraunhoferIAIS.Tutorial.tutorial.step.length - 1;
@@ -541,7 +624,7 @@ FraunhoferIAIS.Tutorial.loadStep = function(stepIndex) {
         stepIndex = 0;
     }
     
-    if (stepIndex === FraunhoferIAIS.Tutorial.getCurrentStepIndex()) {
+    if (stepIndex === currentStepIndex) {
         FraunhoferIAIS.Loading.stopIndicator();
         return persistPromise;
     }
@@ -556,12 +639,19 @@ FraunhoferIAIS.Tutorial.loadStep = function(stepIndex) {
         FraunhoferIAIS.Tutorial.loadProgramOfStep();
 
         return FraunhoferIAIS.Tutorial.refreshStepView();
+    }).catch(function (error) {
+        if (error && error.message) {
+            FraunhoferIAIS.Notification.showNotification('warning', 'Fehler beim Hochladen eines Programm-Exports:', error.message);
+        }
+    }).then(function() {
+        FraunhoferIAIS.Loading.stopIndicator();
     });
 }
 
 FraunhoferIAIS.Tutorial.refreshStepView = function() {
     return FraunhoferIAIS.Tutorial.refreshStepNavigation().then(function() {
         FraunhoferIAIS.Tutorial.refreshSettings('tutorial.step.');
+        FraunhoferIAIS.Tutorial.refreshTips();
         FraunhoferIAIS.Loading.stopIndicator();
     });
 }
