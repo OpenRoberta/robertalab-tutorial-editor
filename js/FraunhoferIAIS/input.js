@@ -76,7 +76,7 @@ FraunhoferIAIS.Input.handleInputChange = function(changeEvent, objectContainer, 
 
 FraunhoferIAIS.Input.traversePathToNodeParent = function(pathArray, parentObject, forcePath) {
     for (var i = 0; i < pathArray.length - 1; i++) {
-        if (!parentObject[pathArray[i]]) {
+        if (!parentObject.hasOwnProperty(pathArray[i]) || parentObject[pathArray[i]] === undefined) {
             
             if (!forcePath) {
                 return null;
