@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2020-02-11 15:18:38.383574",
+		"lastupdated": "2020-04-20 16:58:09.812042",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -753,7 +753,7 @@
 	"BUTTON_DO_UPLOAD_GALLERY": "Upload »$« to the gallery",
 	"BUTTON_EMPTY_LIST": "Empty list",
 	"MESSAGE_NOT_AVAILABLE": "Not available.",
-	"MESSAGE_INVALID_NAME": "Please fill in a correct name. A correct name begins with a letter and can only contain letters or numbers.",
+	"MESSAGE_INVALID_NAME": "Please fill in a correct name. A correct name begins with a letter and can only contain letters or numbers, max. length is 255.",
 	"MESSAGE_INVALID_CONF_NAME": "Please fill in a correct name. A correct name begins with a letter and can only contain letters or numbers. The default name »[robot]basis« can't be used here.",
 	"MESSAGE_EDIT_START": "Your program »$« will run in a moment!",
 	"MESSAGE_EDIT_CHECK": "Your program is now checked!",
@@ -854,7 +854,7 @@
 	"DATATABLE_SHARED": "Shared",
 	"DATATABLE_SHARED_WITH": "Shared with",
 	"DATATABLE_CREATED_ON": "Creation date",
-	"DATATABLE_ACTUALIZATION": "Actualization date",
+	"DATATABLE_ACTUALIZATION": "Modification date",
 	"DATATABLE_CONFIGURATION_NAME": "Configuration name",
 	"DATATABLE_PROGRAMS": "programs",
 	"DATATABLE_CONFIGURATIONS": "configurations",
@@ -1305,13 +1305,14 @@
 	"CONNECTION_SEND_TOOLTIP_BOB3": "Sends a message of type number to another Bob3. Hold the Bob3's face to face!",
 	"BLOCK_NOT_EXECUTED": "The exection of this block will have no effect!",
 	"BLOCK_NOT_SUPPORTED": "This robot does not support this block!",
+	"BLOCK_USED_INCORRECTLY": "Unfortunately, this block cannot be used in this way.",
 	"BOB3_RECALL_NUMBER": "recall number",
 	"BOB3_REMEMBER_NUMBER": "remember number",
 	"BOB3_SAVENUMBER_TOOLTIP": "The number to store should be an integer in the range of 0 to 255",
 	"BOB3_READNUMBER_TOOLTIP": "Returns the previously stored number.",
 	"NAO_RECOGNIZEWORD_TOOLTIP": "Returns a word from the given list when recognized by NAO",
 	"POPUP_CONFIRM_CONTINUE": "<br><br><i>Press »OK« to discard your work. Press »Cancel« to stay here and save your work first.</i>",
-	"MENU_SIM_POSE_TOOLTIP": "Move the robot back to it's initial position.",
+	"MENU_SIM_POSE_TOOLTIP": "Move the robot back to its initial position.",
 	"RESEND_ACTIVATION": "resend verification email",
 	"ORA_USER_ACTIVATION_INVALID_URL": "The link is not valid anymore. Please ask for resending your verification mail again",
 	"FLYOUT_VARIABLE_TEXT": "You need a variable? Please declare it first with a click on the + sign at the »start«\u00a0block.",
@@ -1612,6 +1613,8 @@
 	"MOTIONKIT": "MotionKit",
 	"MOTIONKIT_SINGLE_TOOLTIP": "Sets the selected MotionKit motor/motors to the specified direction.",
 	"MOTIONKIT_DUAL_TOOLTIP": "Sets each MotionKit motor to the specified direction.",
+	"MATH_SINGLE_OP_SQUARE": "square",
+	"MATH_SINGLE_TOOLTIP_SQUARE": "Return the number multiplied by itself.",
 	"GPS_TOOLTIP": "Represents a GPS receiver.",
 	"SENSOR_GPS_SENSEBOX": "GPS receiver",
 	"SENSOR_GPS_LATITUDE_GETSAMPLE_TOOLTIP_SENSEBOX": "Returns the latitude in degree.",
@@ -1627,5 +1630,6 @@
 	"MODE_DATE": "date",
 	"MODE_TIME": "time",
 	"SENSOR_UNIT_METER": "m",
-	"SENSOR_UNIT_SPEED": "km/h"
+	"SENSOR_UNIT_SPEED": "km/h",
+	"ADDRESS": "address"
 }
