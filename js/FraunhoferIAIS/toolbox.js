@@ -53,6 +53,9 @@ FraunhoferIAIS.Toolbox.getUsedBlocksSubsetFromCurrentToolbox = function() {
     categories = currentToolBoxDom.querySelectorAll('category');
     
     for (var i = 0; i < categories.length; i++) {
+        if (categories[i].attributes.name.value === 'TOOLBOX_ACTION' && usedToolBoxBlockTypes.length === 0) {
+            continue;
+        }
         if (categories[i].children.length === 0 
             && (categories[i].attributes.name.value !== 'TOOLBOX_PROCEDURE' || (
                     usedToolBoxBlockTypes.indexOf('robProcedures_defnoreturn') === -1
