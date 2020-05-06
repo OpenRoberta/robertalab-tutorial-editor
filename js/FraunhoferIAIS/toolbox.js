@@ -34,9 +34,6 @@ FraunhoferIAIS.Toolbox.getUsedBlocksSubsetFromCurrentToolbox = function() {
             blockParent = toolBoxBlocks[i].parentNode;
             if (blockParent.tagName.toLowerCase() === 'category') {
                 blockParent.removeChild(toolBoxBlocks[i]);
-                if (blockParent.children.length === 0) {
-                    blockParent.parentNode.removeChild(blockParent);
-                }
             }
         }
     }
