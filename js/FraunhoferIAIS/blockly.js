@@ -2,7 +2,7 @@ var FraunhoferIAIS = FraunhoferIAIS || {};
 
 FraunhoferIAIS.Blockly = FraunhoferIAIS.Blockly || {};
 
-FraunhoferIAIS.Blockly.blocklyPath = FraunhoferIAIS.Blockly.blocklyPath || 'js/blockly';
+FraunhoferIAIS.Blockly.blocklyPath = FraunhoferIAIS.Blockly.blocklyPath || paths.blockly;
 
 FraunhoferIAIS.Blockly.programWorkspace = FraunhoferIAIS.Blockly.programWorkspace || null;
 
@@ -134,7 +134,7 @@ FraunhoferIAIS.Blockly.initConfigurationWorkspace = function() {
     FraunhoferIAIS.Blockly.configurationWorkspace.robControls.disable('runOnBrick');
     FraunhoferIAIS.Blockly.configurationWorkspace.robControls.runOnBrick.setAttribute("style", "display : none");
 
-    FraunhoferIAIS.Blockly.setConfiguration(robotData.configuration.conf);
+    FraunhoferIAIS.Blockly.setConfiguration(robotData.configuration.default);
 
     FraunhoferIAIS.Blockly.configurationWorkspace.addChangeListener(function(event) {
         if (event.type !== Blockly.Events.UI) {
@@ -357,7 +357,7 @@ FraunhoferIAIS.Blockly.replaceRobot = function(robotName, strict) {
             
 
             if (FraunhoferIAIS.Blockly.configurationWorkspace !== null) {
-                FraunhoferIAIS.Blockly.setConfiguration(data.configuration.conf);
+                FraunhoferIAIS.Blockly.setConfiguration(data.configuration.default);
             }
             if (FraunhoferIAIS.Blockly.programWorkspace !== null) {
                 FraunhoferIAIS.Blockly.setProgram(data.program.prog);
@@ -601,7 +601,7 @@ FraunhoferIAIS.Blockly.checkLabExport = function (labExportFileContent, allowRob
     if (!allowRobotChange) {
         var currentRobotGroup = FraunhoferIAIS.Blockly.getRobotGroupName(FraunhoferIAIS.Blockly.currentRobot);
         if (currentRobotGroup !== program.getAttribute('robottype')) {
-            return Promise.reject(new Error('Das in der Datei enthaltene Proramm wurde für ein anderes Robotersystem erstellt und wurde daher nicht geladen.'));
+            return Promise.reject(new Error('Das in der Datei enthaltene Programm wurde für ein anderes Robotersystem erstellt und wurde daher nicht geladen.'));
         }
         robot = FraunhoferIAIS.Blockly.currentRobot;
     }
@@ -649,7 +649,7 @@ FraunhoferIAIS.Blockly.importFromLab = function (labExportFileContent, changeRob
     if (!changeRobot) {
         var currentRobotGroup = FraunhoferIAIS.Blockly.getRobotGroupName(FraunhoferIAIS.Blockly.currentRobot);
         if (currentRobotGroup !== program.getAttribute('robottype')) {
-            return Promise.reject(new Error('Das in der Datei enthaltene Proramm wurde für ein anderes Robotersystem erstellt und wurde daher nicht importiert.'));
+            return Promise.reject(new Error('Das in der Datei enthaltene Programm wurde für ein anderes Robotersystem erstellt und wurde daher nicht importiert.'));
         }
         robot = FraunhoferIAIS.Blockly.currentRobot;
     }
