@@ -3,8 +3,8 @@ Default locations for the lab and blockly repos. In case your installation is di
 or if you have a custom setup, please update these paths accordingly.
 */
 var paths = {
-    orLab: "../openroberta-lab/",
-    blockly: "../blockly",
+    orLab: "http://0.0.0.0:1999/robertalab-tutorial-editor/xml/",
+    blockly: "http://0.0.0.0:1999/blockly",
 };
 
 /*
@@ -25,72 +25,72 @@ Each <robot name> contains the following attributes:
 */
 var robots = {
     arduino: {
-        basePath: paths.orLab + "RobotArdu/src/main/resources/arduino/",
+        basePath: paths.orLab + "arduino/",
         configuration: {},
         toolbox: {},
     },
     bob3: {
-        basePath: paths.orLab + "RobotArdu/src/main/resources/bob3/",
+        basePath: paths.orLab + "bob3/",
         configuration: {},
         toolbox: {},
     },
     botnroll: {
-        basePath: paths.orLab + "RobotArdu/src/main/resources/botnroll/",
+        basePath: paths.orLab + "botnroll/",
         configuration: {},
         toolbox: {},
     },
     festobionic: {
-        basePath: paths.orLab + "RobotArdu/src/main/resources/festobionic/",
+        basePath: paths.orLab + "festobionic/",
         configuration: {},
         toolbox: {},
     },
     mbot: {
-        basePath: paths.orLab + "RobotArdu/src/main/resources/mbot/",
+        basePath: paths.orLab + "mbot/",
         configuration: {},
         toolbox: {},
     },
     nano33blesense: {
-        basePath: paths.orLab + "RobotArdu/src/main/resources/nano33blesense/",
+        basePath: paths.orLab + "nano33blesense/",
         configuration: {},
         toolbox: {},
     },
     sensebox: {
-        basePath: paths.orLab + "RobotArdu/src/main/resources/sensebox/",
+        basePath: paths.orLab + "sensebox/",
         configuration: {},
         toolbox: {},
     },
     edison: {
-        basePath: paths.orLab + "RobotEdison/src/main/resources/",
+        basePath: paths.orLab,
         configuration: {},
         toolbox: {},
     },
     ev3: {
-        basePath: paths.orLab + "RobotEV3/src/main/resources/",
+        basePath: paths.orLab,
         configuration: {},
         toolbox: {},
     },
     calliope: {
-        basePath: paths.orLab + "RobotMbed/src/main/resources/calliope/",
+        basePath: paths.orLab + "calliope/",
         configuration: {},
         toolbox: {},
     },
     microbit: {
-        basePath: paths.orLab + "RobotMbed/src/main/resources/microbit/",
+        basePath: paths.orLab + "microbit/",
         configuration: {},
         toolbox: {},
     },
     nao: {
-        basePath: paths.orLab + "RobotNAO/src/main/resources/",
+        basePath: paths.orLab,
         configuration: {},
         toolbox: {},
     },
     nxt: {
-        basePath: paths.orLab + "RobotNXT/src/main/resources/",
+        basePath: paths.orLab,
         configuration: {},
         toolbox: {},
     },
     wedo: {
-        basePath: paths.orLab + "RobotWeDo/src/main/resources/",
+        basePath: paths.orLab,
         configuration: {},
         toolbox: {},
     },

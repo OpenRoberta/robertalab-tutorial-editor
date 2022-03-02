@@ -4,27 +4,33 @@ A Javascript based web application to create and edit tutorials for the [openrob
 
 ### Prerequisites
 
-This repo is intended to be run alongside a locally installed instance of openroberta-lab.
-As such, there are no specific requirements for this repository, other than the ones mentioned in that repository.
+This repo can be run standalone. As such, there are no prerequisites to be installed.
 
-Please have a look at its [README](https://github.com/OpenRoberta/openroberta-lab/tree/develop/README.md) for instructions on installing and setting up a local instance of the openroberta-lab.
-
-A directory setup as follows will allow you to run this application as is:
+In case a current installation of `openrobertalab_binaries` exists, download this repo such that the directory looks as follows:
 ```
 .
 ├── ...
-├── ...
-├── blockly
-├── openroberta-lab
-└── orlab-tutorial-editor
+├── openrobertalab_binaries
+└── robertalab-tutorial-editor
 ```
 
 ### Usage
 
-To run the application, simply open the [index.html](https://github.com/OpenRoberta/robertalab-tutorial-editor/tree/develop/index.html) file in a web browser.
+#### Linux
+To start the application, open a terminal window in the directory of the repo and run the following:
+```shell
+./start_linux.sh [-b | --browser <browser-name>] [-h | --help]
+```
 
-To use custom paths for robot specific configurations and toolboxes, please refer to [properties.js](https://github.com/OpenRoberta/robertalab-tutorial-editor/tree/develop/js/properties.js) file for editing the various attributes.
+The app will search for `openrobertalab_binaries` in the same directory as this repo.
+If not found, the latest release will be downloaded and unpacked instead.
+
+By default, the app will print out the URLs for accessing the lab and tutorial editor, in case no parameters are provided.
+
+#### Windows
+
+--
 
 ### Compatible browsers
 
-This application has been tested on Google Chrome and Mozilla Firefox. 
+This application has been tested on Google Chrome and Mozilla Firefox.
