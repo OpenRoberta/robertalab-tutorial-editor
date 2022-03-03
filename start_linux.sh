@@ -19,10 +19,7 @@ if [ $(find openrobertalab_binaries/staticResources/ -name robertalab-tutorial-e
   :
 else
   echo "Copying resources..."
-  cp -r orlab-tutorial-editor openrobertalab_binaries/staticResources/
-  VERSION=`basename $(ls openrobertalab_binaries/lib/Robot*-*.jar | head -n1) .jar | cut -d - -f 2`
-  mkdir -p xml && unzip -q openrobertalab_binaries/lib/Robot\*-"$VERSION".jar "*.xml" -d xml
-  mv xml openrobertalab_binaries/staticResources/robertalab-tutorial-editor/
+  cp -r robertalab-tutorial-editor openrobertalab_binaries/staticResources/
   echo "Done!"
 fi
 
@@ -48,22 +45,22 @@ done
 cd openrobertalab_binaries/
 case "$BROWSER" in
   chrome|google-chrome)     if hash google-chrome >/dev/null; then
-                              google-chrome "http://0.0.0.0:1999/robertalab-tutorial-editor" "http://0.0.0.0:1999" &
+                              ( sleep 3; google-chrome "http://0.0.0.0:1999/robertalab-tutorial-editor" "http://0.0.0.0:1999") &
                             else
                               echo "Google Chrome not installed, but supplied as a parameter. Please use another browser..."
                             fi
                             ;;
   firefox|mozilla-firefox)  if hash firefox >/dev/null; then
-                              firefox "http://0.0.0.0:1999/robertalab-tutorial-editor" "http://0.0.0.0:1999" &
+                              ( sleep 3; firefox "http://0.0.0.0:1999/robertalab-tutorial-editor" "http://0.0.0.0:1999") &
                             else
                               echo "Mozilla Firefox not installed, but supplied as a parameter. Please use another browser..."
                             fi
                             ;;
-  *)                        echo "***************************************************************"
+  *)                        echo "*******************************************************************"
                             echo "Browser name not supplied or not installed. Please navigate to:"
                             echo "    ORLab: http://0.0.0.0:1999"
                             echo "    Tutorial editor: http://0.0.0.0:1999/robertalab-tutorial-editor"
-                            echo "***************************************************************"
+                            echo "*******************************************************************"
                             ;;
 esac
 

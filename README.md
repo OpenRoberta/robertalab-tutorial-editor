@@ -22,14 +22,23 @@ To start the application, open a terminal window in the directory of the repo an
 ./start_linux.sh [-b | --browser <browser-name>] [-h | --help]
 ```
 
-The app will search for `openrobertalab_binaries` in the same directory as this repo.
+The application will search for `openrobertalab_binaries` in the same directory as this repo.
 If not found, the latest release will be downloaded and unpacked instead.
 
-By default, the app will print out the URLs for accessing the lab and tutorial editor, in case no parameters are provided.
+By default, the application will print out the URLs for accessing the lab and tutorial editor, in case no parameters are provided.
 
 #### Windows
 
---
+To start the application, open a terminal window in the directory of the repo and run the following:
+```shell
+start_windows.bat
+```
+
+The application will search for `openrobertalab_binaries` in the same directory as this repo.
+If not found, the latest release will be downloaded and unpacked instead.
+
+By default, the application will print out the URLs for accessing the lab and tutorial editor.
+
 
 ### Compatible browsers
 
