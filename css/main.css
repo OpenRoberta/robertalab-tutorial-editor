@@ -522,3 +522,11 @@ textarea.large {
 .icon.icon-style-button.icon-button-tutorial-green:hover {
 	background-color: #C7D92B;
 }
+
+.download-program {
+	font-size: 30px;
+}
+
+.iais-modal > section > p > div {
+	text-align: center;
+}

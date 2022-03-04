@@ -15,17 +15,17 @@ if not exist openrobertalab_binaries\ (
 )
 
 rem Copy `orlab-tutorial-editor` into `staticResources` directory in the binaries
-if not exist openrobertalab_binaries\staticResources\robertalab-tutorial-editor\ (
+if not exist openrobertalab_binaries\staticResources\tutorialEditor\ (
 	echo "Copying resources..."
-	mkdir openrobertalab_binaries\staticResources\robertalab-tutorial-editor\
-	robocopy robertalab-tutorial-editor openrobertalab_binaries\staticResources\robertalab-tutorial-editor /E > null
+	mkdir openrobertalab_binaries\staticResources\tutorialEditor\
+	robocopy robertalab-tutorial-editor openrobertalab_binaries\staticResources\tutorialEditor /E > null
 	echo "Done!"
 )
 
 cd openrobertalab_binaries\
-echo "***************************************************************"
+echo "*********************************************************"
 echo "Please navigate to:"
 echo "    ORLab: http://localhost:1999"
-echo "    Tutorial editor: http://localhost:1999/robertalab-tutorial-editor"
-echo "***************************************************************"
+echo "    Tutorial editor: http://localhost:1999/tutorialEditor"
+echo "*********************************************************"
 call "admin.bat"

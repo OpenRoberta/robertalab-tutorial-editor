@@ -12,18 +12,19 @@ FraunhoferIAIS.Modal.initModalPopups = function () {
     FraunhoferIAIS.Modal.confirmTemplate = FraunhoferIAIS.Template.getTemplate('modal-popup-confirm');
 }
 
-FraunhoferIAIS.Modal.showMessageModal = function (headline, content) {
+FraunhoferIAIS.Modal.showMessageModal = function (headline, content, element) {
     if (!FraunhoferIAIS.Modal.messageTemplate) {
         return;
     }
     var modal = FraunhoferIAIS.Modal.messageTemplate.cloneNode(true);
-    modal.querySelector('button.iais-close').addEventListener('click', function(evt) {
-        evt.prevetnDefault();
-        
-        document.body.removeCild(modal);
+    modal.querySelector('span.iais-confirm').addEventListener('click', function(evt) {
+        evt.preventDefault();
+        document.body.removeChild(modal);
     });
-    modal.querySelector('section > header > *').textContent = headline;
-    modal.querySelector('section > p').textContent = content;
+    modal.querySelector('section > header > *').innerHTML = headline;
+    modal.querySelector('section > p').innerHTML = content;
+    element && modal.querySelector('section > p').appendChild(element);
+    modal.style.display = 'block';
     document.body.appendChild(modal);
 }
 
