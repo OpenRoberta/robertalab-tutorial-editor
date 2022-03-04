@@ -51,21 +51,21 @@ done
 cd openrobertalab_binaries/
 case "$BROWSER" in
   chrome|google-chrome)     if hash google-chrome >/dev/null; then
-                              ( sleep 3; google-chrome "http://0.0.0.0:1999/tutorialEditor" "http://0.0.0.0:1999") &
+                              ( sleep 5; google-chrome "http://localhost:1999/tutorialEditor" "http://localhost:1999/") &
                             else
                               echo "Google Chrome not installed, but supplied as a parameter. Please use another browser..."
                             fi
                             ;;
   firefox|mozilla-firefox)  if hash firefox >/dev/null; then
-                              ( sleep 3; firefox "http://0.0.0.0:1999/tutorialEditor" "http://0.0.0.0:1999") &
+                              ( sleep 5; firefox "http://localhost:1999/tutorialEditor" "http://localhost:1999/") &
                             else
                               echo "Mozilla Firefox not installed, but supplied as a parameter. Please use another browser..."
                             fi
                             ;;
   *)                        echo "***************************************************************"
                             echo "Browser name not supplied or not installed. Please navigate to:"
-                            echo "    ORLab: http://0.0.0.0:1999"
-                            echo "    Tutorial editor: http://0.0.0.0:1999/tutorialEditor"
+                            echo "    ORLab: http://localhost:1999/"
+                            echo "    Tutorial editor: http://localhost:1999/tutorialEditor"
                             echo "***************************************************************"
                             ;;
 esac

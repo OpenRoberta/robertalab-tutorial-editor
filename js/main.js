@@ -690,28 +690,25 @@ FraunhoferIAIS.Tutorial.initGlobalEvents = function() {
 
     downloadButton.addEventListener('click', function(clickEvent) {
         clickEvent.preventDefault();
-        let modalHeadline = 'Programm-Download fertig!',
-            modalContent = 'Klicke mit der rechten Maustaste auf den untenstehenden Link,<br> ' +
-                'wähle "Speichern unter...",<br> ' +
-                'Navigiere zum Ordner "admin/tutorial" in dieser Applikation,<br>' +
-                'klicke auf "Speichern" um das Tutorial zu speichern!<br> <br>';
 
-        var fileName = 'tutorial',
-            downloadDiv = document.createElement('div'),
-            downloadElement = document.createElement('a');
+        var fileName = 'tutorial';
 
-        FraunhoferIAIS.Tutorial.persistCurrentProgramInStep().then(function() {
+        FraunhoferIAIS.Tutorial.persistCurrentProgramInStep().then(async function() {
             if (FraunhoferIAIS.Tutorial.tutorial.name) {
                 fileName = FraunhoferIAIS.Tutorial.tutorial.name.replace(/[^\w]+/g, '-').toLowerCase();
             }
 
-            downloadElement.className = 'download-program';
-            downloadElement.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(FraunhoferIAIS.Tutorial.tutorial, null, 4));
-            downloadElement.setAttribute('download', fileName + '.json');
-            downloadElement.innerText = `${fileName}.json`;
-            downloadDiv.appendChild(downloadElement);
+            const data = JSON.stringify(FraunhoferIAIS.Tutorial.tutorial, null, 4);
 
-            FraunhoferIAIS.Modal.showMessageModal(modalHeadline, modalContent, downloadDiv);
+            if ('chooseFileSystemEntries' in window || 'showOpenFilePicker' in window) {
+                await FraunhoferIAIS.FileHandling.FileSystemAccess.saveFile(data);
+            } else {
+                FraunhoferIAIS.FileHandling.LegacyAccess.saveFile(fileName, data);
+            }
+
+            let headline = 'Programm-Download abgeschlossen!',
+                content = '';
+            FraunhoferIAIS.Modal.showMessageModal(headline, content);
         });
     });
 

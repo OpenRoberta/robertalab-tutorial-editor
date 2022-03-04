@@ -1,10 +1,4 @@
-// Check OS to set the host name accordingly.
-let HOSTNAME = ""
-if (navigator.userAgent.indexOf("Linux") !== -1) {
-    HOSTNAME = "http://0.0.0.0:1999/"
-} else if (navigator.userAgent.indexOf("Win") !== -1) {
-    HOSTNAME = "http://localhost:1999/"
-}
+let HOSTNAME = "http://localhost:1999/"
 
 // Paths for use in the tutorial editor application.
 const paths = {
