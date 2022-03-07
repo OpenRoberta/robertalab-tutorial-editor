@@ -22,10 +22,33 @@ if not exist openrobertalab_binaries\staticResources\tutorialEditor\ (
 	echo "Done!"
 )
 
+set ADMIN_DIR="%HOMEDRIVE%%HOMEPATH%\openroberta-tutorial"
+
+:arg_parser
+if not "%1"=="" (
+    if if "%1"=="-admin-dir" (
+        set ADMIN_DIR=%2
+        shift
+    )
+    if if "%1"=="-help" (
+        @echo on
+        echo "Usage:"
+        echo "    start_windows.bat [-admin-dir <admin-dir>] [-help]"
+        echo ""
+        echo "<admin-dir> defaults to '%HOMEDRIVE%%HOMEPATH%\openroberta-tutorial', for example:"
+        echo "        C:\Users\mmustermann\openroberta-tutorial"
+        echo ""
+        @echo off
+        exit /B 0
+    )
+    shift
+    goto :arg_parser
+)
+
 cd openrobertalab_binaries\
 echo "*********************************************************"
 echo "Please navigate to:"
 echo "    ORLab: http://localhost:1999"
 echo "    Tutorial editor: http://localhost:1999/tutorialEditor"
 echo "*********************************************************"
-call "admin.bat"
+call admin.bat -admin-dir %ADMIN_DIR%
