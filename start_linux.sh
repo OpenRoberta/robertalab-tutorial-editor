@@ -1,11 +1,9 @@
 # Get `openrobertalab_binaries` from git, if one doesn't exist already
 cd ../
 
-if [ $(find -name openrobertalab_binaries | wc -l) -gt 0 ]; then
-  :
-else
-  echo "Getting latest binaries..."
-  wget -q https://github.com/OpenRoberta/openroberta-lab/releases/latest/download/openrobertalab_binaries.zip
+if [[ ( ${PWD} == ${HOME} && $(find openrobertalab_binaries | wc -l) -eq 0 ) || ( ${PWD} != ${HOME} && $(find -name openrobertalab_binaries | wc -l) -eq 0 ) ]]; then
+  echo "No current installation of openrobertalab_binaries found. Getting latest binaries..."
+  curl -sLO https://github.com/OpenRoberta/openroberta-lab/releases/latest/download/openrobertalab_binaries.zip
   echo "Done!"
 
   # Unzip the binaries folder, then delete the zip
@@ -14,11 +12,9 @@ else
   echo "Done!"
 fi
 
-# Copy `orlab-tutorial-editor` into `staticResources` directory in the binaries
+# Copy `robertalab-tutorial-editor` into `staticResources` directory in the binaries
 # and rename it to "tutorialEditor", so that the URL in the application is succint!
-if [ $(find openrobertalab_binaries/staticResources/ -name tutorialEditor | wc -l) -gt 0 ]; then
-  :
-else
+if [ $(find openrobertalab_binaries/staticResources/ -name tutorialEditor | wc -l) -eq 0 ]; then
   echo "Copying resources..."
   cp -r robertalab-tutorial-editor openrobertalab_binaries/staticResources/tutorialEditor
   echo "Done!"
@@ -38,8 +34,7 @@ do
     -h|--help)      echo "Usage:"
                     echo "    ./start_linux.sh [-a | --admin-dir <admin-dir>] [-b | --browser <browser-name>] [-h | --help]"
                     echo ""
-                    echo "<admin-dir> defaults to '$HOME/openroberta-tutorial', for example:"
-                    echo "  /home/mmustermann/openroberta-tutorial"
+                    echo "<admin-dir> defaults to '$HOME/openroberta-tutorial'"
                     echo "If <browser-name> provided is not installed, URLs to access the"
                     echo "application will be printed to stdout."
                     echo ""
