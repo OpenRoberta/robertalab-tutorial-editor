@@ -5,7 +5,8 @@ A Javascript based web application to create and edit tutorials for the [openrob
 ### Prerequisites
 
 This repo can be run standalone. As such, there are no prerequisites to be installed.
-
+> When installing with the zip file, ensure that the name of the unzipped folder is `robertalab-tutorial-editor`!
+ 
 In case a current installation of `openrobertalab_binaries` exists, download this repo such that the directory looks as follows:
 ```
 .
@@ -38,6 +39,12 @@ The application will search for `openrobertalab_binaries` in the same parent dir
 If not found, the latest release will be downloaded and unpacked instead.
 
 By default, the application will print out the URLs for accessing the lab and tutorial editor.
+
+### Accessing the tutorial editor
+
+Upon running the start script for the relevant OS, the server - and with it, the tutorial editor - will be started at:
+- ORLab: http://localhost:1999/
+- Tutorial editor: http://localhost:1999/tutorialEditor
 
 ### Viewing the tutorials
 
