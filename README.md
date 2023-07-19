@@ -4,8 +4,18 @@ A Javascript based web application to create and edit tutorials for the [openrob
 
 ### Prerequisites
 
-This repo can be run standalone. As such, there are no prerequisites to be installed.
-> When installing with the zip file, ensure that the name of the unzipped folder is `robertalab-tutorial-editor`!
+Running the lab requires **Java**. If you do not have Java installed on your computer, here are steps for installing it on Linux and Windows:
+
+#### Linux
+  - Open a terminal, then execute the following command:
+    ```shell
+    sudo apt-get install openjdk-11-jre
+    ```
+
+#### Windows
+  - Follow the steps in [this installation guide for Windows](https://www.java.com/en/download/help/windows_manual_download.html).
+
+> When installing with the zip file, **ensure** that the name of the unzipped folder is `robertalab-tutorial-editor`!
  
 In case a current installation of `openrobertalab_binaries` exists, download this repo such that the directory looks as follows:
 ```
